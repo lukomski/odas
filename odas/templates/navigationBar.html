@@ -1,0 +1,31 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+
+      {% if authorized %}
+      <li class="nav-item {{'active' if selectedElement == 'homePage' }}">
+        <a class="nav-link" href="{{ url_for('homePage') }}">Strona główna<span class="sr-only">(current)</span></a>
+      </li>
+      {% endif %}
+
+      {% if not authorized %}
+      <li class="nav-item {{'active' if selectedElement == 'registerPage' }}">
+        <a class="nav-link" href="{{ url_for('registerPage') }}">Zarejestruj się</a>
+      </li>
+      {% endif %}
+
+      {% if authorized %}
+      <li class="nav-item">
+        <a class="nav-link" href="#" onclick="logout()">Wyloguj</a>
+      </li>
+      {% endif %}
+
+      {% if not authorized %}
+      <li class="nav-item {{'active' if selectedElement == 'loginPage' }}">
+        <a class="nav-link" href="{{ url_for('loginPage') }}">Zaloguj się</a>
+      </li>
+      {% endif  %}
+
+    </ul>
+  </div>
+</nav>
