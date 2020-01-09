@@ -1,0 +1,16 @@
+version: '2'
+services:
+  web:
+    container_name: vueapp_c
+    restart: always
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    command: []
+    ports:
+      - "8081:5000" # external:internal
+    volumes:
+      - ".:/app"
+    environment:
+      - ENV=development
+      - PORT=5000
