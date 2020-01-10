@@ -1,9 +1,8 @@
 <template>
  <div>
-<NavigationBar/>
 <br>
  <div class="d-flex justify-content-center">
-  <div class="col-md-4 ">
+  <div class="col-md-4">
     <b-form @submit="onSubmit" v-if="show">
       <b-form-group
         id="input-group-1"
@@ -37,7 +36,6 @@
 
 <script>
   import axios from 'axios';
-  import NavigationBar from './NavigationBar'
   export default {
     data() {
       return {
@@ -72,9 +70,6 @@
             alert(e)  
         })
       }
-    },
-    components: {
-     'NavigationBar' : NavigationBar
     }
   }
 </script>
