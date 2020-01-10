@@ -1,5 +1,5 @@
 from flask import Flask, request, render_template, jsonify, session, redirect, send_file
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 import os
 
 import random
@@ -79,7 +79,8 @@ def homePage():
 # backend
 
 # return file or json if eny error
-@app.route("/api/files/<user_id>/pub/<file_name>", methods=["POST", "GET", "delete"])
+@app.route("/api/files/<user_id>/pub/<file_name>", methods=["POST", "GET", "delete", "options"])
+@cross_origin(supports_credentials=True)
 def api_publicfile(user_id, file_name):
 	if request.method == "GET":
 		try:
@@ -158,6 +159,7 @@ def api_publicfile(user_id, file_name):
 	
 
 @app.route("/api/files/<user_id>/priv/<file_name>", methods=["POST", "GET", "delete"])
+@cross_origin()
 def api_privatefile(user_id, file_name):
 	if request.method == "GET":
 		try:
@@ -288,7 +290,8 @@ def api_authorize():
 	answer = jsonify(
 		success=True, 
 		message="Poprawne zalogowanie użytkownika " + username, 
-		username=username
+		username=username,
+		session_id=session_id
 		)
 	answer.set_cookie("session_id", session_id)
 	return answer

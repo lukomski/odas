@@ -3,11 +3,7 @@ import 'mutationobserver-shim'
 import Vue from 'vue'
 import './plugins/bootstrap-vue'
 import App from './App.vue'
-// import PageNotFound from './pages/404.vue'
-// import Home from './pages/Home.vue'
-// import About from './pages/About.vue'
-// import Login from '@/components/Login.vue'
-// import Register from '@/components/Register.vue'
+
 
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
 // app.js
@@ -19,7 +15,6 @@ Vue.use(BootstrapVue)
 // Optionally install the BootstrapVue icon components plugin
 Vue.use(IconsPlugin)
 
-
 Vue.config.productionTip = false
 
 // const routes = {
@@ -29,8 +24,12 @@ Vue.config.productionTip = false
 //   '/login' : Login,
 //   '/register' : Register
 // }
+import VueSession from 'vue-session'
+
+Vue.use(VueSession)
 
 import router from "./router";
+
 
 // new Vue({
 //   el: '#app',
@@ -57,3 +56,7 @@ new Vue({
   router,
   render: h => h(App)
 }).$mount("#app");
+
+var VueCookie = require('vue-cookie');
+// Tell Vue to use the plugin
+Vue.use(VueCookie);

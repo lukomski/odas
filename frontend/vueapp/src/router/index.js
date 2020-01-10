@@ -7,13 +7,8 @@ export default new Router ({
   routes: [
     {
       path: '/',
-      name: 'HelloWorld',
-      component: () => import('@/components/Login')
-    },
-    {
-      path: '/home',
       name: 'Home',
-      component: () => import('@/pages/Home')
+      component: () => import('@/components/Home')
     },
     {
       path: '/about',

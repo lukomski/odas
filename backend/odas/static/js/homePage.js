@@ -30,7 +30,7 @@ function uploadPubFile() {
 			.done(function(response) {
 				console.log(response)
 				if (response.success) {
-					window.location.reload(false); 
+					//window.location.reload(false); 
 				} else {
 					addMessage(false, response.message)
 				}

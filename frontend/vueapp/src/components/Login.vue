@@ -50,7 +50,6 @@
       onSubmit(evt) {
         evt.preventDefault()
 
-
         axios.get('http://localhost:5000/api/authorize', {
           params: {
             username: this.form.login,
@@ -59,9 +58,11 @@
         })
         .then(response => {
           let message = response.data.message
-          if (response.data.status) {
-            alert("OK: " + message)
-            this.$parent.currentRoute  = '/'
+          if (response.data.success) {
+            this.$session.set("user_session",response.data.session_id)
+            this.$session.set("username",response.data.username)
+            this.$cookie.set('session_id', response.data.session_id);
+            this.$router.push('/')
           } else {
             alert("ER: " + message)
           }
