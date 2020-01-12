@@ -78,6 +78,27 @@ def homePage():
 
 # backend
 
+@app.route("/api/files/<user_id>/pub", methods=["GET"])
+@cross_origin(supports_credentials=True)
+def api_allpublicfiles(user_id):
+	if request.method == "GET":
+
+		directory = "/odas/" + app.config['UPLOAD_FOLDER'] + user_id
+
+		pub_files = []
+		if os.path.exists(directory+"/pub"):
+			pub_files = os.listdir(directory+"/pub")
+		return jsonify(
+			success=True,
+			message="poprawne pobranie dostepnych plikow publicznych dla uzytkownika " + user_id,
+			files=pub_files
+			)
+	return jsonify(
+			success=False,
+			message="method " + request.method + " is forbidden for the request"
+			)
+
+
 # return file or json if eny error
 @app.route("/api/files/<user_id>/pub/<file_name>", methods=["POST", "GET", "delete", "options"])
 @cross_origin(supports_credentials=True)
@@ -153,14 +174,47 @@ def api_publicfile(user_id, file_name):
 			message="Poprawne usunięcie  pliku " + full_path
 			)
 	return jsonify(
-			success=True,
+			success=False,
 			message="method " + request.method + " is forbidden for the request"
 			)
-	
+
+@app.route("/api/files/<user_id>/priv", methods=["GET"])
+@cross_origin(supports_credentials=True)
+def api_allprivatefiles(user_id):
+	if request.method == "GET":
+		if 'session_id' not in request.cookies:
+			return jsonify(
+				success=False,
+				message="brak session_id w cookies"
+				)
+		session_id = request.cookies.get("session_id")
+		
+		username = getUserKeyForSessionId(session_id)
+
+		if username == None:
+			return jsonify(
+				success=False,
+				message="sesja wygasla - zaloguj sie ponownie"
+				)
+		
+		directory = "/odas/" + app.config['UPLOAD_FOLDER'] + username
+
+		pub_files = []
+		if os.path.exists(directory+"/priv"):
+			pub_files = os.listdir(directory+"/priv")
+		return jsonify(
+			success=True,
+			message="poprawne pobranie dostepnych plikow prywatnych dla uzytkownika " + username,
+			files=pub_files
+			)
+	return jsonify(
+			success=False,
+			message="method " + request.method + " is forbidden for the request"
+			)	
 
 @app.route("/api/files/<user_id>/priv/<file_name>", methods=["POST", "GET", "delete"])
-@cross_origin()
-def api_privatefile(user_id, file_name):
+@cross_origin(supports_credentials=True)
+def api_privatefile(file_name):
 	if request.method == "GET":
 		try:
 			path = "/odas/" + app.config['UPLOAD_FOLDER'] + user_id + "/priv/" + file_name

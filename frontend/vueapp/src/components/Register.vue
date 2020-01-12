@@ -3,7 +3,7 @@
 <br>
  <div class="d-flex justify-content-center">
   <div class="col-md-4 ">
-    <b-form @submit="onSubmit" @reset="onReset" v-if="show">
+    <b-form @submit="onSubmit"  v-if="show">
       <b-form-group
         id="input-group-1"
         label="Login"
@@ -19,7 +19,7 @@
 
       <b-form-group id="input-group-2" label="Hasło" label-for="input-2">
         <b-form-input
-          id="input-2"
+          id="input-password"
           v-model="form.password"
           required
           placeholder=""
@@ -29,7 +29,7 @@
 
       <b-form-group id="input-group-2" label="Powtórz hasło" label-for="input-2">
         <b-form-input
-          id="input-2"
+          id="input-repeat-password"
           v-model="form.repeatPassword"
           required
           placeholder=""
