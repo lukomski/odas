@@ -372,6 +372,7 @@ def api_authorize():
 	return answer
 
 @app.route("/api/adduser", methods=["GET", "POST"])
+@cross_origin(supports_credentials=True)
 def api_addUser():
 	if 'username' not in request.values:
 		return jsonify(
@@ -443,6 +444,7 @@ def api_printRedis():
 		message=l
 		)
 @app.route("/api/logout", methods=["GET", "POST"])
+@cross_origin(supports_credentials=True)
 def api_logout():
 	if 'session_id' not in request.cookies:
 		return jsonify(
@@ -462,6 +464,62 @@ def api_logout():
 	return jsonify(
 		success=True,
 		message="Poprawne usunięcie sesji z aplikacji"
+		)
+
+@app.route("/api/changepassword", methods=["GET", "POST"])
+@cross_origin(supports_credentials=True)
+def api_changePassword():
+	if 'session_id' not in request.cookies:
+		return jsonify(
+		success=False,
+		message="Nie było session_id w cookies"
+		)
+	session_id = request.cookies.get("session_id")
+	
+	if 'password' not in request.values:
+		return jsonify(
+			success=False,
+			message="password jest wymaganyy" + request
+			)
+	password = request.values.get("password")
+
+	if 'old_password' not in request.values:
+		return jsonify(
+			success=False,
+			message="old_password jest wymagany"
+			)
+	old_password = request.values.get("old_password")
+
+
+	username = getUserKeyForSessionId(session_id)
+	if username == None:
+		return jsonify(
+		success=False,
+		message="sesja wygasła"
+		)
+	# check if corrent login and password
+	if db.hget(username, "password_hash") == None :
+		return jsonify(
+			success=False,
+			message="Niepoprawny login lub hasło użytkownika"
+			)
+	pass_hash = db.hget(username, "password_hash").decode()
+	try:
+		ph.verify(pass_hash, old_password)
+	except Exception as e:
+		# wrong password, but dont tell it straight to user
+		return jsonify(
+			success=False,
+			message="Niepoprawny obecne hasło użytkownika"
+			)
+	# change password
+	pass_hash = ph.hash(password.encode())
+	db_line = {"username" : username, "password_hash" : pass_hash}
+	db.hmset(username, db_line)
+
+	return jsonify(
+		success=True,
+		message="Poprawna zmiana hasla użytkownika " + username
 		)
 
 @app.route("/api/test")

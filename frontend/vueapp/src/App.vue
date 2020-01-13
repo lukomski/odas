@@ -44,7 +44,13 @@ export default {
 			this.$store.dispatch('setUsername', this.$session.get("username"))
 			this.$store.dispatch('logIn')
 		} else {
-			this.$router.push('/login')
+			console.log(this.$router.history.current.name == 'Login')
+
+			console.log(this.$router.history.current)
+			if (this.$router.history.current.path == '/') {
+
+				//this.$router.go('/login') // go redirect whithout saving to history
+			}
 		}
 		
 		console.log("App mouted = " )

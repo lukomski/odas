@@ -274,6 +274,8 @@ export default {
 		if (this.isLogged) {
 			this.loadPubData()
 			this.loadPrivData()
+		} else {
+			this.$router.push('/login').catch()
 		}
 	},
 	components: {
@@ -291,5 +293,8 @@ function uploadPubFilee() {
 <style>
 a.fileReferences {
 	width: 60%;
+}
+#title {
+	text-align: center;
 }
 </style>

@@ -3,7 +3,7 @@
 <br>
  <div class="d-flex justify-content-center">
   <div class="col-md-4">
-    <b-form @submit="onSubmit" v-if="show">
+    <b-form v-if="show">
       <b-form-group
         id="input-group-1"
         label="Login"
@@ -27,12 +27,15 @@
         ></b-form-input>
       </b-form-group>
 
-      <b-button type="submit" variant="success">Zaloguj</b-button>
+      <b-button type="button" v-on:click="onSubmit()" variant="success">Zaloguj</b-button>
     </b-form>
   </div>
   </div>
   </div>
 </template>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="{{ url_for('static', filename='jquery.js') }}">\x3C/script>')</script>
 
 <script>
   import axios from 'axios';
@@ -48,8 +51,8 @@
     },
     methods: {
       onSubmit(evt) {
-        evt.preventDefault()
-
+        //evt.preventDefault()
+        console.log(evt)
         axios.get('http://localhost:5000/api/authorize', {
           params: {
             username: this.form.login,
@@ -60,10 +63,11 @@
           let message = response.data.message
           if (response.data.success) {
             this.$session.set("username",response.data.username) // in case of reload page
+            this.$cookie.set('session_id', response.data.session_id);
             
             this.$store.dispatch('logIn')
             this.$store.dispatch('setUsername', response.data.username)
-            this.$router.push('/')
+            this.$router.push('/').catch()
           } else {
             alert("ER: " + message)
           }

@@ -27,12 +27,18 @@ export default new Router ({
     {
       path: '/login',
       name: 'Login',
+      replace: true,
       component: () => import('@/components/Login')
+    },
+    {
+      path: '/changepassword',
+      name: 'ChangePassword',
+      component: () => import('@/components/ChangePassword')
     },
     {
       path: '/register',
       name: 'Register',
       component: () => import('@/components/Register')
     }
-  ]
+  ],
 })
