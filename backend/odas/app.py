@@ -1,5 +1,12 @@
-from flask import Flask, request, render_template, jsonify, session, redirect, send_file
+from flask import Flask, request, render_template, jsonify, session, redirect, send_file, escape
 from flask_cors import CORS, cross_origin
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
+from argon2 import PasswordHasher
+ph = PasswordHasher()
+
+
 import os
 
 import random
@@ -12,18 +19,23 @@ CORS(app)
 app.config['UPLOAD_FOLDER'] = "uploadFiles/"
 app.config['EXPIRATION_SECONDS'] = 300
 
+limiter = Limiter(
+    app,
+    key_func=get_remote_address,
+    default_limits=["3 per second"] # limit for all endpoints
+)
+
 import redis
-import hashlib
 db = redis.StrictRedis(host='redis', port=6379)
 
 # temporary database
 import json
 DB_USERS = []
 
-
 @app.route("/register")
 def registerPage():
 	return render_template("register.html", authorize=isLogged(request))
+
 
 @app.route("/login")
 def loginPage():
@@ -214,7 +226,7 @@ def api_allprivatefiles(user_id):
 
 @app.route("/api/files/<user_id>/priv/<file_name>", methods=["POST", "GET", "delete"])
 @cross_origin(supports_credentials=True)
-def api_privatefile(file_name):
+def api_privatefile(user_id, file_name):
 	if request.method == "GET":
 		try:
 			path = "/odas/" + app.config['UPLOAD_FOLDER'] + user_id + "/priv/" + file_name
@@ -295,6 +307,7 @@ def api_privatefile(file_name):
 			)
 
 @app.route("/api/authorize", methods=["GET", "POST"])
+@cross_origin(supports_credentials=True)
 def api_authorize():
 	# get input values
 	if 'username' not in request.values:
@@ -313,15 +326,23 @@ def api_authorize():
 	username = request.values.get("username")
 	password = request.values.get("password")
 
-	passw_hash = hashlib.sha512(password.encode("utf-8")).hexdigest()
-
+ 
 	# check if corrent login and password
-	if db.hget(username, "password_hash") == None or db.hget(username, "password_hash").decode() != passw_hash:
+	if db.hget(username, "password_hash") == None :
 		return jsonify(
 			success=False,
 			message="Niepoprawny login lub hasło użytkownika"
 			)
-
+	pass_hash = db.hget(username, "password_hash").decode()
+	try:
+		ph.verify(pass_hash, password)
+	except Exception as e:
+		# wrong password, but dont tell it straight to user
+		return jsonify(
+			success=False,
+			message="Niepoprawny login lub hasło użytkownika"
+			)
+ 
 	# create session_id
 	session_id = None
 	for i in range(10):
@@ -373,8 +394,8 @@ def api_addUser():
 			message="użytkownik " + username + " istnieje"
 			)
 
-	password_hash = hashlib.sha512(password.encode()).hexdigest()
-	db_line = {"username" : username, "password_hash" : password_hash}
+	pass_hash = ph.hash(password.encode())
+	db_line = {"username" : username, "password_hash" : pass_hash}
 	db.hmset(username, db_line)
 
 	message = "Poprawne dodanie użytkownika " + username
@@ -445,35 +466,7 @@ def api_logout():
 
 @app.route("/api/test")
 def test():
-	if 'session_id' not in request.cookies:
-		return jsonify(
-			success=False,
-			message="brak session_id w cookies"
-			)
-	session_id = request.cookies.get("session_id")
-	keys = getDBKeys()
-	username = None
-	for key in keys:
-		if not db.hexists(key, "session_id"):
-			continue
-		curr_session_id = db.hget(key, "session_id").decode("utf-8")
-		curr_session_timestamp = int(float(db.hget(key, "session_timestamp").decode("utf-8")))
-		if curr_session_id != session_id:
-			continue
-		now = datetime.now()
-		timestamp = datetime.timestamp(now)
-		if (timestamp - curr_session_timestamp) > app.config['EXPIRATION_SECONDS']:
-			db.hdel(key, "session_id")
-			db.hdel(key, "session_timestamp")
-			continue
-		username = key
-		break
-	if username == None:
-		return jsonify(
-			success=False,
-			message="username = None"
-			)
-	return username
+	return "elo"
 
 # tool functions
 

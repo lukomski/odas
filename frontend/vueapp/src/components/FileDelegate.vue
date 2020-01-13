@@ -16,32 +16,26 @@
 		props: ["file", "isPublic"],
 		methods: {
 			download: function () {
-				if (this.isPublic) {
-					this.$emit('download',this.file)
-				//	this.downloadPubFile(this.file.name)
-				}
-				else {
-					alert("not public TODO")
-				}
+				this.$emit('download',this.file)
 			},
 			remove: function () {
-				alert("should remove " + this.file.name)
+				this.$emit('delete',this.file)
 			},
-			downloadPubFile: function (filename) {
-				axios.get('http://localhost:5000/api/files/' + this.username + '/pub/' + filename
-				).then(response => {
-					let message = response.data.message
-					if (response.data.success) {
-						alert("OK: " + message)
-					} else {
-						alert("ER: " + message)
-					}
-				}).catch(e => {
-					// page not found
-					alert("Nieznany pub użytkownik " + this.username + " e = " + e)
-					//alert(e.response)  
-				})
-			}
+			// downloadPubFile: function (filename) {
+			// 	axios.get('http://localhost:5000/api/files/' + this.username + '/pub/' + filename
+			// 	).then(response => {
+			// 		let message = response.data.message
+			// 		if (response.data.success) {
+			// 			alert("OK: " + message)
+			// 		} else {
+			// 			alert("ER: " + message)
+			// 		}
+			// 	}).catch(e => {
+			// 		// page not found
+			// 		alert("Nieznany pub użytkownik " + this.username + " e = " + e)
+			// 		//alert(e.response)  
+			// 	})
+			// }
 		}
 	}
 

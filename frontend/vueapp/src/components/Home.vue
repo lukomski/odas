@@ -1,7 +1,8 @@
 <template>
 	<div>
-		<h1 id="title">Witaj {{ username }}</h1>
-		<div class="container-fluid">
+		<h1 id="title" v-if="this.isLogged">Witaj {{ this.username }}</h1>
+		<h1 id="title" v-if="!this.isLogged">Strona użytkownika {{ this.username }}</h1>
+		<div class="container-fluid" v-if="this.isLogged">
 			<div class="row">
 				<div class="col-md-6 panel">
 					<h1>Dodaj plik</h1>
@@ -34,13 +35,14 @@
 							v-bind:isPublic = true
 							v-bind:key="file.name" 
 							v-on:download="downloadPubFile"
+							v-on:delete="deletePubFile"
 							class="list-group-item d-flex justify-content-between align-items-center"
 						/>
 
 					</ul>
 				</div>
 
-				<div v-if="isOwner" class="col-md-6 panel">
+				<div v-if="this.isLogged" class="col-md-6 panel">
 				<h1>Pliki prywatne</h1><br>
 					<ul class="list-group col-md-12">
 
@@ -51,6 +53,7 @@
 							v-bind:isPublic = true
 							v-bind:key="file.name" 
 							v-on:download="downloadPrivFile"
+							v-on:delete="deletePrivFile"
 							class="list-group-item d-flex justify-content-between align-items-center"
 						/>
 
@@ -76,17 +79,19 @@ import FileDelegate from "@/components/FileDelegate"
 export default {
 	data: function() {
 		return {
-			name: 'Home',
-			username: "test",
-			
-			priv_files: [
-				{ name: "privfile"}
-			],
+			name: 'Home',			
+			priv_files: [],
 			upload_file: "",
 			isOwner: true,
-			pub_files: [
-				{ name: "pubfile"}
-			]
+			pub_files: []
+		}
+	},
+	computed: {
+		isLogged () {
+			return this.$store.state.isLogged
+		},
+		username () {
+			return this.$store.state.username
 		}
 	},
 	methods: {
@@ -127,6 +132,7 @@ export default {
 			axios.post('http://localhost:5000/api/files/' + this.username + '/priv/' + file.name, 
 			form
 			).then(response => {
+				console.log("response = " + response)
 				let message = response.data.message
 				if (response.data.success) {
 					//alert("OK: " + message)
@@ -184,7 +190,10 @@ export default {
 			})
 		},
 		downloadPubFile: function (file) {
-			axios.get('http://localhost:5000/api/files/' + this.username + '/pub/' + file.name
+			axios.get('http://localhost:5000/api/files/' + this.username + '/pub/' + file.name, 
+			{
+				responseType: 'blob'
+			}
 			).then(response => {
 				let downloadedfile = response.data
 				const url = window.URL.createObjectURL(new Blob([downloadedfile]));
@@ -198,7 +207,13 @@ export default {
 			})
 		},
 		downloadPrivFile: function (file) {
-			axios.get('http://localhost:5000/api/files/' + this.username + '/priv/' + file.name
+			axios.get('http://localhost:5000/api/files/' + this.username + '/priv/' + file.name,
+			{
+				responseType: 'blob',
+				headers: {
+					'Accept': 'application/vnd.ms-excel'
+				}
+			}
 			).then(response => {
 				let downloadedfile = response.data
 				const url = window.URL.createObjectURL(new Blob([downloadedfile]));
@@ -210,11 +225,56 @@ export default {
 			}).catch(e => {
 				alert("CRITICAL: " + e)
 			})
-		}	
+		},
+		deletePubFile: function (file) {
+			axios.delete('http://localhost:5000/api/files/' + this.username + '/pub/' + file.name
+			).then(response => {
+				if (response.data.success) {
+					console.log("OK PUB: " + response.data.message)
+					this.loadPubData()
+				} else {
+					console.log("ER: " + response.data.message)
+				}
+			}).catch(e => {
+				alert("CRITICAL: " + e)
+			})
+		},
+		deletePrivFile: function (file) {
+			axios.delete('http://localhost:5000/api/files/' + this.username + '/priv/' + file.name
+			).then(response => {
+				if (response.data.success) {
+					console.log("OK PRIV: " + response.data.message)
+					this.loadPrivData()
+				} else {
+					console.log("ER: " + response.data.message)
+				}
+			}).catch(e => {
+				alert("CRITICAL: " + e)
+			})
+		},
+		buyTv: function () {
+			// Dispatch the action to buy a TV
+			if (this.isLogged) {
+				this.$store.dispatch('logOut')
+			} else {
+				this.$store.dispatch('logIn')
+			}
+		}
+	},
+	watch: {
+		isLogged: function (val) {
+			if (this.isLogged) {
+				this.loadPubData()
+				this.loadPrivData()
+			}
+		}
 	},
 	mounted: function () {
-		this.loadPubData()
-		this.loadPrivData()
+		console.log("mouted in Home")
+		if (this.isLogged) {
+			this.loadPubData()
+			this.loadPrivData()
+		}
 	},
 	components: {
 		'FileDelegate': FileDelegate

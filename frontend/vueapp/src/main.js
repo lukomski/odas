@@ -5,6 +5,7 @@ import './plugins/bootstrap-vue'
 import App from './App.vue'
 
 
+
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
 // app.js
 import 'bootstrap/dist/css/bootstrap.css'
@@ -17,46 +18,20 @@ Vue.use(IconsPlugin)
 
 Vue.config.productionTip = false
 
-// const routes = {
-//   '/': Home,
-//   '/about': About,
-//   '/app' : App,
-//   '/login' : Login,
-//   '/register' : Register
-// }
 import VueSession from 'vue-session'
 
 Vue.use(VueSession)
 
 import router from "./router";
-
-
-// new Vue({
-//   el: '#app',
-//   data: {
-//     currentRoute: window.location.pathname
-//   },
-//   computed: {
-//     ViewComponent () {
-//       return routes[this.currentRoute] || PageNotFound
-//     }
-//   },
-//   render (h) { 
-//     return h(this.ViewComponent) 
-//   },
-//   methods: {
-//     changedRoute(route) {
-//       alert("whitam w mainie" + route);
-//       this.currentRoute = route
-//     }
-//   }
-// })
-
-new Vue({
-  router,
-  render: h => h(App)
-}).$mount("#app");
+import store from './store/store'
 
 var VueCookie = require('vue-cookie');
 // Tell Vue to use the plugin
 Vue.use(VueCookie);
+
+new Vue({
+	router,
+	store,
+	render: h => h(App)
+}).$mount("#app");
+

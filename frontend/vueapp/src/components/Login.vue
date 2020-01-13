@@ -59,9 +59,10 @@
         .then(response => {
           let message = response.data.message
           if (response.data.success) {
-            this.$session.set("user_session",response.data.session_id)
-            this.$session.set("username",response.data.username)
-            this.$cookie.set('session_id', response.data.session_id);
+            this.$session.set("username",response.data.username) // in case of reload page
+            
+            this.$store.dispatch('logIn')
+            this.$store.dispatch('setUsername', response.data.username)
             this.$router.push('/')
           } else {
             alert("ER: " + message)
