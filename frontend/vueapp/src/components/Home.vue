@@ -38,6 +38,13 @@
 							v-on:delete="deletePubFile"
 							class="list-group-item d-flex justify-content-between align-items-center"
 						/>
+						<Card 
+							v-for="note in notes"
+							:title="note.title"
+							:key="note"
+							:subtitle="note.author" 
+							:message="note.message"
+						/>
 
 					</ul>
 				</div>
@@ -62,6 +69,14 @@
 			</div>
 		</div>
 
+		<Card 
+			v-for="note in notes"
+			:title="note.title"
+			:key="note"
+			:subtitle="note.author" 
+			:message="note.message"
+		/>
+
 	</div>
 
 </template>
@@ -75,6 +90,7 @@ import axios from 'axios'
 axios.defaults.withCredentials = true
 
 import FileDelegate from "@/components/FileDelegate"
+import Card from "@/components/Card"
 
 export default {
 	data: function() {
@@ -83,7 +99,19 @@ export default {
 			priv_files: [],
 			upload_file: "",
 			isOwner: true,
-			pub_files: []
+			pub_files: [],
+			notes: [
+				{
+					'title': '"NYT": W ukraiński samolot uderzyły dwa pociski. Nowe nagranie',
+					'author': 'Interia',
+					'message': 'Tuż po katastrofie pojawiły się spekulacje, że samolot mógł zostać zestrzelony przez Iran, ponieważ w tym czasie Teheran przeprowadzał atak na amerykańskie bazy w Iraku. Początkowo Iran odpierał zarzuty, jednak w sobotę ogłosił, że do zestrzelenia faktycznie doszło. "Z powodu błędu ludzkiego, w Czytaj więcej na https://fakty.interia.pl/raporty/raport-bliski-wschod/aktualnosci/news-nyt-w-ukrainski-samolot-uderzyly-dwa-pociski-nowe-nagranie,nId,4260996#utm_source=paste&utm_medium=paste&utm_campaign=chrome"'
+				},
+				{
+					'title': 'Interwencja w Nowym Czarnowie. Areszt dla drugiego policjanta',
+					'author': 'Interia',
+					'message': 'Dwa miesiące w areszcie spędzi policjant, który usłyszał zarzut przekroczenia uprawnień podczas interwencji w Nowym Czarnowie - poinformowała we wtorek prokuratura. Wcześniej sąd zdecydował o tymczasowym aresztowaniu innego policjanta z patrolu, który miał niewłaściwie użyć siły wobec mieszkańca Gryfina.'
+				}
+			]
 		}
 	},
 	computed: {
@@ -279,7 +307,8 @@ export default {
 		}
 	},
 	components: {
-		'FileDelegate': FileDelegate
+		'FileDelegate': FileDelegate,
+		'Card' : Card
 	}
 }
 

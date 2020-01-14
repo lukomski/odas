@@ -5,7 +5,7 @@ WORKDIR /app
 COPY ./frontend/vueapp/package.json .
 RUN npm install
 COPY ./frontend/vueapp .
-EXPOSE 5000
+EXPOSE 80
 CMD ["npm", "run", "serve"]
 
 # build stage
@@ -19,5 +19,8 @@ RUN npm run build
 # production stage
 FROM nginx:stable-alpine as production-stage
 COPY --from=build-stage /app/dist /usr/share/nginx/html
+
 EXPOSE 80
+#RUN sleep 100000000
 CMD ["nginx", "-g", "daemon off;"]
+#CMD ["nginx"]
