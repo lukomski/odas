@@ -1,81 +1,46 @@
 <template>
 	<div>
-		<h1 id="title" v-if="this.isLogged">Witaj {{ this.username }}</h1>
+		<h1 id="title" v-if="this.isLogged">Użytkownik {{ this.username }}</h1>
 		<h1 id="title" v-if="!this.isLogged">Strona użytkownika {{ this.username }}</h1>
 		<div class="container-fluid" v-if="this.isLogged">
 			<div class="row">
 				<div class="col-md-6 panel">
-					<h1>Dodaj plik</h1>
 					<br>
-					<form method="POST" enctype="multipart/form-data" action="#">
-						<div class="form-group">
-							<input 
-								type="file" 
-								name="file" 
-								class="form-control-file" 
-								id="fileInput"
-								>
-						</div>
-						<button type="button" class="btn btn-outline-success" v-on:click="uploadPubFile()">Dodaj plik publiczny</button>
-						<button type="button" class="btn btn-outline-warning" v-on:click="uploadPrivFile()">Dodaj plik prywatny</button>
-					</form>
+					<h1 id="title">Program do przechowywania notatek</h1>
+					<br>
+					<div class="h1 mb-0" id="imageDiv">
+						<b-icon-book variant="warning" font-scale="7.5"/>
+					</div>
+					
+				</div>
+				<div class="col-md-6 panel">
+					<br>
+					<Card
+						:insertMode=true
+						:viewers=[]
+					/>
 				</div>
 			</div>
 		</div>
 		<br>
 		<div class="container-fluid">
-			<div class="row">
-				<div class="col-md-6 panel">
-					<h1>Pliki publiczne</h1><br>
+			<div class="d-flex justify-content-center">
+				<div class="col-md-8 panel">
+					<h1>Dostępne notatki</h1><br>
 					<ul class="list-group col-md-12">
-
-						<FileDelegate 
-							v-for="file in pub_files"
-							v-bind:file = "file"
-							v-bind:isPublic = true
-							v-bind:key="file.name" 
-							v-on:download="downloadPubFile"
-							v-on:delete="deletePubFile"
-							class="list-group-item d-flex justify-content-between align-items-center"
-						/>
 						<Card 
 							v-for="note in notes"
 							:title="note.title"
-							:key="note"
+							:key="note.id"
 							:subtitle="note.author" 
 							:message="note.message"
+							:viewers="note.viewers"
+							:inserMode=false
 						/>
-
-					</ul>
-				</div>
-
-				<div v-if="this.isLogged" class="col-md-6 panel">
-				<h1>Pliki prywatne</h1><br>
-					<ul class="list-group col-md-12">
-
-
-						<FileDelegate 
-							v-for="file in priv_files"
-							v-bind:file = "file"
-							v-bind:isPublic = true
-							v-bind:key="file.name" 
-							v-on:download="downloadPrivFile"
-							v-on:delete="deletePrivFile"
-							class="list-group-item d-flex justify-content-between align-items-center"
-						/>
-
 					</ul>
 				</div>
 			</div>
 		</div>
-
-		<Card 
-			v-for="note in notes"
-			:title="note.title"
-			:key="note"
-			:subtitle="note.author" 
-			:message="note.message"
-		/>
 
 	</div>
 
@@ -89,8 +54,8 @@
 import axios from 'axios'
 axios.defaults.withCredentials = true
 
-import FileDelegate from "@/components/FileDelegate"
-import Card from "@/components/Card"
+import FileDelegate from "@/components/Home/FileDelegate"
+import Card from "@/components/Home/Card"
 
 export default {
 	data: function() {
@@ -103,13 +68,24 @@ export default {
 			notes: [
 				{
 					'title': '"NYT": W ukraiński samolot uderzyły dwa pociski. Nowe nagranie',
-					'author': 'Interia',
-					'message': 'Tuż po katastrofie pojawiły się spekulacje, że samolot mógł zostać zestrzelony przez Iran, ponieważ w tym czasie Teheran przeprowadzał atak na amerykańskie bazy w Iraku. Początkowo Iran odpierał zarzuty, jednak w sobotę ogłosił, że do zestrzelenia faktycznie doszło. "Z powodu błędu ludzkiego, w Czytaj więcej na https://fakty.interia.pl/raporty/raport-bliski-wschod/aktualnosci/news-nyt-w-ukrainski-samolot-uderzyly-dwa-pociski-nowe-nagranie,nId,4260996#utm_source=paste&utm_medium=paste&utm_campaign=chrome"'
+					'author': 'Obserwatorzy',
+					'message': 'Tuż po katastrofie pojawiły się spekulacje, że samolot mógł zostać zestrzelony przez Iran, ponieważ w tym czasie Teheran przeprowadzał atak na amerykańskie bazy w Iraku. Początkowo Iran odpierał zarzuty, jednak w sobotę ogłosił, że do zestrzelenia faktycznie doszło. "Z powodu błędu ludzkiego, w Czytaj więcej na https://fakty.interia.pl/raporty/raport-bliski-wschod/aktualnosci/news-nyt-w-ukrainski-samolot-uderzyly-dwa-pociski-nowe-nagranie,nId,4260996#utm_source=paste&utm_medium=paste&utm_campaign=chrome"',
+					'viewers': [
+						{ 'name': 'Adam', 'id': 0},
+						{ 'name': 'Jacek', 'id': 1},
+						{ 'name': 'Michał', 'id': 2}
+						],
+					'id': "0"
 				},
 				{
 					'title': 'Interwencja w Nowym Czarnowie. Areszt dla drugiego policjanta',
-					'author': 'Interia',
-					'message': 'Dwa miesiące w areszcie spędzi policjant, który usłyszał zarzut przekroczenia uprawnień podczas interwencji w Nowym Czarnowie - poinformowała we wtorek prokuratura. Wcześniej sąd zdecydował o tymczasowym aresztowaniu innego policjanta z patrolu, który miał niewłaściwie użyć siły wobec mieszkańca Gryfina.'
+					'author': 'Obserwatorzy',
+					'message': 'Dwa miesiące w areszcie spędzi policjant, który usłyszał zarzut przekroczenia uprawnień podczas interwencji w Nowym Czarnowie - poinformowała we wtorek prokuratura. Wcześniej sąd zdecydował o tymczasowym aresztowaniu innego policjanta z patrolu, który miał niewłaściwie użyć siły wobec mieszkańca Gryfina.',
+					'viewers': [
+						{'name': 'Łysy', 'id': 0},
+						{'name': 'Biały', 'id': 1}
+						],
+					'id': "1"
 				}
 			]
 		}
@@ -323,7 +299,7 @@ function uploadPubFilee() {
 a.fileReferences {
 	width: 60%;
 }
-#title {
+#title, #imageDiv {
 	text-align: center;
 }
 </style>

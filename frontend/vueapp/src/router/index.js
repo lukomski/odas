@@ -9,7 +9,7 @@ export default new Router ({
     {
       path: '/',
       name: 'Home',
-      component: () => import('@/components/Home'),
+      component: () => import('@/components/Home/Home'),
       meta: { 
         requiresAuth: true,
         title: "Dashboard"
