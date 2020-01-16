@@ -14,11 +14,11 @@ open [http://localhost:8081](http://localhost:8081)
 
 base info about current user based on cookies
 
-`PUT` ?username=,password= 
+`POST` ?username=,password= 
 
 authorize, create session 
 
-`POST` ?password=
+`PUT` ?password=
 
 change password for current user
 
@@ -36,7 +36,7 @@ add new user
 
 notes filterd by userId if set
 
-`POST`
+`POST`?title=,message=,viewers=[],public
 
 add new note for current user
 
