@@ -41,6 +41,9 @@
   </div>
 </template>
 
+<!-- Need to console.log works -->
+<script src="//unpkg.com/vue@latest/dist/vue.min.js"/>
+
 <script>
   import axios from 'axios'
   axios.defaults.withCredentials = true
@@ -56,6 +59,11 @@
         show: true
       }
     },
+    computed: {
+      username () {
+        return this.$store.state.username
+      }
+    },
     methods: {
       onSubmit(evt) {
         evt.preventDefault()
@@ -64,15 +72,16 @@
           return
         }
 
-        axios.get('http://localhost:5000/api/changepassword', {
+        axios.put('http://localhost:5000/api/users/' + this.username + "/password", null, {
           params: {
             old_password: this.form.oldPassword,
             password: this.form.password
           } ,
         })
         .then(response => {
+          console.log(response.data)
           let message = response.data.message
-          if (response.data.status) {
+          if (response.data.success) {
             alert("OK: " + message)
           } else {
             alert("ER: " + message)

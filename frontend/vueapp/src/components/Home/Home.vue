@@ -17,6 +17,7 @@
 					<br>
 					<Card
 						:insertMode=true
+						:ownerMode=true
 						:viewers=[]
 					/>
 				</div>
@@ -35,7 +36,13 @@
 							:subtitle="note.author" 
 							:message="note.message"
 							:viewers="note.viewers"
+							:note_hash="note.id"
+							:note_public="note.public"
 							:inserMode=false
+							:ownerMode=true
+							v-on:updated="loadNote(note.id)"
+							v-on:deleted="deleteNote(note.id)"
+							v-on:reloadNotes="loadNotes()"
 						/>
 					</ul>
 				</div>
@@ -99,197 +106,117 @@ export default {
 		}
 	},
 	methods: {
-		uploadPubFile() {
-			let file = document.getElementById("fileInput").files[0]
-			if (file == undefined) {
-				alert("wybierz plik do wysłania")
-				return
-			}
-			this.upload_file = file
-			let form = new FormData()
-			form.append("file", this.upload_file)
-
-			axios.post('http://localhost:5000/api/files/' + this.username + '/pub/' + file.name, 
-			form
-			).then(response => {
+		loadNotes: function () {
+			console.log("loadNotes")
+			axios.get('http://localhost:5000/api/notes', null, {
+				params: {
+				}
+			})
+			.then(response => {
+				console.log(response.data)
 				let message = response.data.message
 				if (response.data.success) {
-					//alert("OK: " + message)
-					this.loadPubData()
-				} else {
-					alert("ER: " + message)
-				}
-			}).catch(e => {
-				alert(e)  
-			})
-		},
-		uploadPrivFile() {
-			let file = document.getElementById("fileInput").files[0]
-			if (file == undefined) {
-				alert("wybierz plik do wysłania")
-				return
-			}
-			this.upload_file = file
-			let form = new FormData()
-			form.append("file", this.upload_file)
-
-			axios.post('http://localhost:5000/api/files/' + this.username + '/priv/' + file.name, 
-			form
-			).then(response => {
-				console.log("response = " + response)
-				let message = response.data.message
-				if (response.data.success) {
-					//alert("OK: " + message)
-					this.loadPrivData()
-				} else {
-					alert("ER: " + message)
-				}
-			}).catch(e => {
-				alert(e)  
-			})
-			
-		},
-		loadPubData: function () {
-			// load public files
-			let self = this
-			axios.get('http://localhost:5000/api/files/' + this.username + '/pub'
-				).then(response => {
-					let message = response.data.message
-					if (response.data.success) {
-						let list = []
-						for (let file of response.data.files) {
-							list.push({"name":file})		
+					let notes = response.data.notes
+					console.log(notes)
+					let new_notes = []
+					for (var i=0; i < notes.length; i++) {
+						let v = {
+							"title" : notes[i].title,
+							"author" : "Obserwatorzy", // to refactor
+							"message" : notes[i].message,
+							"viewers" : notes[i].viewers,
+							"public" : notes[i].public,
+							"id" : notes[i].id
 						}
-						this.pub_files = list
-					} else {
-						console.log("ER: " + message)
+						new_notes.push(v)
 					}
-				}).catch(e => {
-					// page not found
-					alert("Nieznany pub użytkownik " + this.username)
-					//alert(e.response)  
-				})
-			
+					this.notes = new_notes
+				} else {
+				}
+			})
+			.catch(e => {
+				alert(e)  
+			})
 		},
-		loadPrivData: function () {
-			//load private files
-			axios.get('http://localhost:5000/api/files/' + this.username + '/priv'
-			).then(response => {
+		loadNote: function (note_hash) {
+			console.log("loadNotes")
+			axios.get('http://localhost:5000/api/notes/' + note_hash, null, {
+				params: {
+				}
+			})
+			.then(response => {
+				console.log(response.data)
 				let message = response.data.message
 				if (response.data.success) {
-					//this.priv_files = []
-					let list = []
-					console.log("OK PRIV: " + message + response.data.files)
-					for (let file of response.data.files) {
-						list.push({"name":file})
+					// get note with note_hash
+					let it = undefined
+					for (var i=0; i<this.notes.length; i++) {
+						if (this.notes[i].id == note_hash) {
+							it = i
+							break
+						}
 					}
-					this.priv_files = list
+					if (it == undefined) {
+						console.log("note "+ note_hash + " not found in notes")
+						return
+					}
+					let v = {
+						"title" : response.data.note.title,
+						"author" : "Obserwatorzy", // to refactor
+						"message" : response.data.note.message,
+						"viewers" : response.data.note.viewers,
+						"public" : response.data.note.public,
+						"id" : response.data.note.id
+					}
+
+					let new_notes = []
+					for (var i=0; i<this.notes.length; i++) {
+						if (this.notes[i].id == note_hash) {
+							new_notes.push(v)
+						} else {
+							new_notes.push(this.notes[i])
+						}
+					}
+					this.notes = new_notes
 				} else {
-					console.log("ER: " + message)
 				}
-			}).catch(e => {
-				// page not found
-				alert("CRITICAL: " + e)
-				//alert(e.response)  
+			})
+			.catch(e => {
+				alert(e)  
 			})
 		},
-		downloadPubFile: function (file) {
-			axios.get('http://localhost:5000/api/files/' + this.username + '/pub/' + file.name, 
-			{
-				responseType: 'blob'
-			}
-			).then(response => {
-				let downloadedfile = response.data
-				const url = window.URL.createObjectURL(new Blob([downloadedfile]));
-				const link = document.createElement('a');
-				link.href = url;
-				link.setAttribute('download', file.name);
-				document.body.appendChild(link);
-				link.click();
-			}).catch(e => {
-				alert("CRITICAL: " + e)
-			})
-		},
-		downloadPrivFile: function (file) {
-			axios.get('http://localhost:5000/api/files/' + this.username + '/priv/' + file.name,
-			{
-				responseType: 'blob',
-				headers: {
-					'Accept': 'application/vnd.ms-excel'
+		deleteNote: function (note_hash) {
+			let new_notes = []
+			for (var i=0; i<this.notes.length; i++) {
+				if (this.notes[i].id != note_hash) {
+					new_notes.push(this.notes[i])
 				}
 			}
-			).then(response => {
-				let downloadedfile = response.data
-				const url = window.URL.createObjectURL(new Blob([downloadedfile]));
-				const link = document.createElement('a');
-				link.href = url;
-				link.setAttribute('download', file.name);
-				document.body.appendChild(link);
-				link.click();
-			}).catch(e => {
-				alert("CRITICAL: " + e)
-			})
+			this.notes = new_notes
 		},
-		deletePubFile: function (file) {
-			axios.delete('http://localhost:5000/api/files/' + this.username + '/pub/' + file.name
-			).then(response => {
-				if (response.data.success) {
-					console.log("OK PUB: " + response.data.message)
-					this.loadPubData()
-				} else {
-					console.log("ER: " + response.data.message)
-				}
-			}).catch(e => {
-				alert("CRITICAL: " + e)
-			})
-		},
-		deletePrivFile: function (file) {
-			axios.delete('http://localhost:5000/api/files/' + this.username + '/priv/' + file.name
-			).then(response => {
-				if (response.data.success) {
-					console.log("OK PRIV: " + response.data.message)
-					this.loadPrivData()
-				} else {
-					console.log("ER: " + response.data.message)
-				}
-			}).catch(e => {
-				alert("CRITICAL: " + e)
-			})
-		},
-		buyTv: function () {
-			// Dispatch the action to buy a TV
-			if (this.isLogged) {
-				this.$store.dispatch('logOut')
-			} else {
-				this.$store.dispatch('logIn')
-			}
-		}
 	},
 	watch: {
 		isLogged: function (val) {
 			if (this.isLogged) {
-				this.loadPubData()
-				this.loadPrivData()
+				this.loadNotes()
+			} else {
+				//this.$router.push('/login').catch()
 			}
 		}
 	},
 	mounted: function () {
 		console.log("mouted in Home")
 		if (this.isLogged) {
-			this.loadPubData()
-			this.loadPrivData()
+			// this.loadPubData()
+			// this.loadPrivData()
 		} else {
-			this.$router.push('/login').catch()
+			//this.$router.push('/login').catch()
 		}
 	},
 	components: {
 		'FileDelegate': FileDelegate,
 		'Card' : Card
 	}
-}
-
-function uploadPubFilee() {
-	
 }
 
 </script>

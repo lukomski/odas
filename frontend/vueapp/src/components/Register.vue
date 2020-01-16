@@ -44,6 +44,9 @@
   </div>
 </template>
 
+<!-- Need to console.log works -->
+<script src="//unpkg.com/vue@latest/dist/vue.min.js"/>
+
 <script>
   import axios from 'axios';
   export default {
@@ -61,18 +64,17 @@
       onSubmit(evt) {
         evt.preventDefault()
 
-        axios.get('http://localhost:5000/api/adduser', {
+        axios.post('http://localhost:5000/api/users', null, {
           params: {
             username: this.form.login,
             password: this.form.password
           } ,
         })
         .then(response => {
+          console.log(response.data)
           let message = response.data.message
           if (response.data.status) {
-            alert("OK: " + message)
           } else {
-            alert("ER: " + message)
           }
         })
         .catch(e => {

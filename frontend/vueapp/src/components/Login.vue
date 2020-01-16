@@ -52,14 +52,15 @@
     methods: {
       onSubmit(evt) {
         //evt.preventDefault()
-        console.log(evt)
-        axios.get('http://localhost:5000/api/authorize', {
+       //console.log(evt)
+        axios.post('http://localhost:5000/api/user', null, {
           params: {
             username: this.form.login,
             password: this.form.password
           } ,
         })
         .then(response => {
+          console.log(response.data)
           let message = response.data.message
           if (response.data.success) {
             this.$session.set("username",response.data.username) // in case of reload page

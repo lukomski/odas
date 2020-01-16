@@ -29,7 +29,7 @@
 				@delete="deleteViewer(viewer.id)"
 			/>
 			
-			<a type="button" @click="startEditViewers()" class="h4 mb-0" v-if="!edit_viewers_visible">
+			<a type="button" @click="startEditViewers()" class="h4 mb-0" v-if="viewers_pencil_visible">
 				<b-icon-pencil variant="info"/>
 			</a>
 
@@ -61,8 +61,8 @@
 					<b-icon-x variant="danger"/>
 				</a>
 			</b-card-text>
-			<b-button variant="success" v-if="insertMode">Dodaj notatkę</b-button>
-			<b-button variant="danger" v-if="!insertMode">Usuń notatkę</b-button>
+			<b-button variant="success" @click="addNote()" v-if="insertMode">Dodaj notatkę</b-button>
+			<b-button variant="danger" @click="deleteNote()" v-if="remove_button_visible">Usuń notatkę</b-button>
 		</b-card>
 		<br>
 	</div>
@@ -73,6 +73,7 @@
 
 <script>
 	import BadgeElement from "@/components/Home/BadgeElement"
+	import axios from 'axios'
 	export default {
 		data: function () {
 			return {
@@ -85,16 +86,19 @@
 				edit_public_input: false
 			}
 		},
-		props: ["title", "subtitle", "message", "viewers", "insertMode"],
+		props: ["title", "subtitle", "message", "viewers", "insertMode", "ownerMode", "note_hash", "note_public"],
 		methods: {
 			startEditTitle: function () {
+				this.rejectAllEditions()
 				this.edit_title_input = this.title
 				this.edit_title=true;
 			},
 			acceptEditTitle: function () {
-				this.title = this.edit_title_input
+			//	this.title = this.edit_title_input
 				this.edit_title=false;
+
 				// send request
+				this.sendUpdateToServer(this.edit_title_input, this.message)
 				console.log("send request to update title of note")
 			},
 			rejectEditTitle: function () {
@@ -102,12 +106,14 @@
 			},
 
 			startEditMessage: function () {
+				this.rejectAllEditions()
 				this.edit_message_input = this.message
 				this.edit_message=true;
 			},
 			acceptEditMessage: function () {
-				this.message = this.edit_message_input
+			//	this.message = this.edit_message_input
 				this.edit_message=false;
+				this.sendUpdateToServer(this.title, this.edit_message_input)
 				console.log("send request to update message of note")
 			},
 			rejectEditMessage: function () {
@@ -115,6 +121,7 @@
 			},
 
 			startEditViewers: function () {
+				this.rejectAllEditions()
 				this.edit_viewers=true
 			},
 			addNewViewer: function () {
@@ -143,26 +150,105 @@
 			},
 			acceptEditViewers: function () {
 				this.edit_viewers=false
+			},
+			rejectAllEditions: function () {
+				this.rejectEditMessage()
+				this.rejectEditTitle()
+				this.acceptEditViewers() // it can be only accepted.
+			},
+			deleteNote: function () {
+				console.log('deleteNote')
+				axios.delete('http://localhost:5000/api/notes/' + this.note_hash)
+				.then(response => {
+					console.log(response.data)
+					let message = response.data.message
+					if (response.data.success) {
+						//this.$emit('deleted')
+						this.$emit('reloadNotes')
+					} else {
+						alert("ER: " + message)
+					}
+				})
+				.catch(e => {
+					alert(e)  
+				})	
+			},
+			addNote1: function() {
+				let payload = {
+					viewers: ['ala', 'ma', 'kota'],
+					title: this.edit_title_input,
+					message: this.edit_message_input,
+					public: this.edit_public_input
+				}
+				axios.post('http://localhost:5000/api/notes', null, {
+					data: payload
+				})
+				.then(response => {
+					console.log(response.data)
+					let message = response.data.message
+					if (response.data.success) {
+						console.log("emit next")
+						this.$emit('reloadNotes')
+						console.log("after emit")
+					} else {
+						alert("ER: " + message)
+					}
+				})
+				.catch(e => {
+					alert(e)  
+				})
+			},
+			addNote: function() {
+				console.log("YEP")
+				this.$emit('reloadNotes')
+			},
+			sendUpdateToServer: function (new_title, new_message) {
+				let payload = {
+					viewers: ['ala', 'ma', 'kota'],
+					title: new_title,
+					message: new_message,
+					public: this.edit_public_input
+				}
+				axios.post('http://localhost:5000/api/notes/' + this.note_hash, null, {
+					params: {
+					},
+					data: payload
+				})
+				.then(response => {
+					console.log(response.data)
+					let message = response.data.message
+					if (response.data.success) {
+						this.$emit('updated')
+					} else {
+						alert("ER: " + message)
+					}
+				})
+				.catch(e => {
+					alert(e)  
+				})
 			}
 		},
 		computed: {
 			edit_title_visible: function () {
 				return this.edit_title || this.insertMode
 			},
-			pencil_button_visible: function () {
-				return !(this.edit_message || this.insertMode)
-			},
 			edit_viewers_visible: function () {
 				return this.edit_viewers || this.insertMode
+			},
+			viewers_pencil_visible: function () {
+				return (!this.edit_viewers) && this.ownerMode && (!this.insertMode)
 			},
 			edit_message_visible: function () {
 				return this.edit_message || this.insertMode
 			},
 			message_pencil_visible: function () {
-				return !(this.edit_message || this.insertMode)
+				return (!this.edit_message) && this.ownerMode && (!this.insertMode)
 			},
 			title_pencil_visible: function () {
-				return !(this.edit_title || this.insertMode)
+				return (!this.edit_title) && this.ownerMode && (!this.insertMode)
+			},
+			remove_button_visible: function () {
+				return (!this.insertMode) && (this.ownerMode)
 			}
 		},
 		watch: {

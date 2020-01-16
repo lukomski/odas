@@ -12,4 +12,4 @@ ENV PORT=1000
 
 EXPOSE ${PORT}
 
-ENTRYPOINT ["python3","-u", "odas/app.py"]
+ENTRYPOINT ["python3","-u", "odas/main.py"]
