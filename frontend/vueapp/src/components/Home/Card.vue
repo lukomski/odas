@@ -173,7 +173,7 @@
 					alert(e)  
 				})	
 			},
-			addNote1: function() {
+			addNote: function() {
 				let payload = {
 					viewers: ['ala', 'ma', 'kota'],
 					title: this.edit_title_input,
@@ -198,16 +198,6 @@
 					alert(e)  
 				})
 			},
-			// anomal function
-			// ------------------------------------------------
-			addNote: function() {
-				console.log("YEP")
-				this.$emit('reloadNotes') 		// !!!!!!!!!!
-				// is not emiting or not handling in parent
-				// but the same emit works in function 'deleteNote' above
-				// EVENTUALLY this function should looks like deleteNote1
-			},
-			//-------------------------------------------------
 			sendUpdateToServer: function (new_title, new_message) {
 				let payload = {
 					viewers: ['ala', 'ma', 'kota'],

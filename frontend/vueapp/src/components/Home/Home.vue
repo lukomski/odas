@@ -19,6 +19,7 @@
 						:insertMode=true
 						:ownerMode=true
 						:viewers=[]
+						v-on:reloadNotes="loadNotes()"
 					/>
 				</div>
 			</div>
