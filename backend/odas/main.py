@@ -263,10 +263,25 @@ def apiUserPassword(username):
 def apiNotes():
 	if request.method == 'GET':
 		# notes filterd by userId if set
+		user_hash = None
+		username = ''
+		if 'username' in request.values:
+			# dont want all accesible notes but only owned by the username
+			username = request.values.get('username')
+			user_hash = getUserHashByUsername(username)
+			if user_hash == None:
+				# want filter by username which not exists
+				return jsonify(
+					success=True,
+					message="lista notatek",
+					notes=[],
+					)
+
 		return jsonify(
 			success=True,
 			message="lista notatek",
-			notes=getJsonAboutNotes(None)
+			notes=getJsonAboutNotes(user_hash),
+			username=user_hash
 			)
 	elif request.method == 'POST':
 		# add new note for current user
@@ -276,7 +291,10 @@ def apiNotes():
 				message="brak session_id w cookies"
 				)
 		session_hash = request.cookies.get("session_id")
+
 		user_hash = getUserHashBySessionHash(session_hash)
+
+
 			
 		field = 'title'
 		if field not in request.json:
@@ -309,6 +327,7 @@ def apiNotes():
 				message=field +" jest wymagany"
 				)
 		viewers = request.json.get(field)
+
 
 		if public:
 			viewers = []
@@ -671,6 +690,14 @@ def getJsonAboutNotes(user_hash):
 	owner_field = "owner"
 	for key in getAllNoteKeys():
 
+		owner_hash = db.hget(key, owner_field)
+		if owner_hash == None:
+			continue
+		owner_hash = owner_hash.decode()
+
+		if user_hash != None and owner_hash != user_hash:
+			continue
+
 		title = db.hget(key, title_field)
 		if title == None:
 			continue
@@ -695,11 +722,6 @@ def getJsonAboutNotes(user_hash):
 		if note_hash == None:
 			continue
 		note_hash = note_hash.decode()
-
-		owner_hash = db.hget(key, owner_field)
-		if owner_hash == None:
-			continue
-		owner_hash = owner_hash.decode()
 
 		viewer_json = {
 			"title" : title,

@@ -1,7 +1,7 @@
 <template>
   <div>
   <b-navbar toggleable="lg" type="dark" variant="dark">
-    <b-navbar-brand href="#">ODAS</b-navbar-brand>
+    <b-navbar-brand>ODAS</b-navbar-brand>
 
     <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
 
@@ -10,7 +10,7 @@
         
         <b-nav-form>
           <b-form-input size="sm" class="mr-sm-2" v-model="username_input" placeholder="Użytkownik"></b-form-input>
-          <b-button size="sm" class="my-2 my-sm-0" type="submit">Szukaj</b-button>
+          <b-button size="sm" class="my-2 my-sm-0" @click="searchUser()">Szukaj</b-button>
         </b-nav-form>
  
       </b-navbar-nav>
@@ -40,12 +40,38 @@ export default {
     isLogged: function () {
       return this.$store.state.isLogged
     },
+    username () {
+      return this.$store.state.username
+    }
   },
   methods: {
     logout: function () {
       this.$session.remove("username")
       this.$cookie.delete('session_id')
       this.$store.dispatch('logOut')
+    },
+    searchUser: function () {
+      // get check if user exists
+      let new_route = '/user/' + this.username_input
+      if (window.location.pathname != new_route) {
+        this.$router.push(new_route).catch()
+      }
+      
+      // if exists open page /user/<username>
+    },
+    goToHomePage: function () {
+      if (this.isLogged) {
+        let new_route = '/user/' + this.username_input
+        if (window.location.pathname != new_route) {
+          this.$router.push(new_route).catch()
+        }
+      } else {
+        let new_route = '/login'
+        if (window.location.pathname != new_route) {
+          this.$router.push(new_route).catch()
+        }
+      }
+      
     }
   }
 }

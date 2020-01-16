@@ -13,7 +13,7 @@ export default new Router ({
       meta: { 
         requiresAuth: true,
         title: "Dashboard"
-      }
+      },
     },
     {
       path: '/about',
@@ -39,6 +39,11 @@ export default new Router ({
       path: '/register',
       name: 'Register',
       component: () => import('@/components/Register')
+    },
+    {
+      path: '/user/:page_owner',
+      name: 'UserPage',
+      component: () => import('@/components/UserPage'),
     }
   ],
 })

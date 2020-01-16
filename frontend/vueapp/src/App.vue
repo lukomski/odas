@@ -46,8 +46,13 @@ import NavigationBar from '@/components/NavigationBar'
 					if (response.data.success) {
 						this.$store.dispatch('setUsername', response.data.username)
 						this.$store.dispatch('logIn')
+						if (window.location.pathname == '/') {
+							this.$router.push('/user/' + response.data.username).catch()
+						}
 					} else {
-						this.$router.push('/login').catch()
+						if (window.location.pathname == '/') {
+							this.$router.push('/login').catch()
+						}
 					}
 				})
 				.catch(e => {
@@ -63,7 +68,11 @@ import NavigationBar from '@/components/NavigationBar'
 				// this.$store.dispatch('setUsername', this.$session.get("username"))
 				// this.$store.dispatch('logIn')
 			} else {
-				this.$router.push('/login').catch()
+				if (window.location.pathname == '/') {
+					this.$router.push('/login').catch()
+				}
+
+				//this.$router.push('/login').catch()
 				// console.log(this.$router.history.current.name == 'Login')
 
 				// console.log(this.$router.history.current)

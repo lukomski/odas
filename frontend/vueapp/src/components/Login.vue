@@ -68,7 +68,7 @@
             
             this.$store.dispatch('logIn')
             this.$store.dispatch('setUsername', response.data.username)
-            this.$router.push('/').catch()
+            this.$router.push('/user/'+response.data.username).catch()
           } else {
             alert("ER: " + message)
           }
