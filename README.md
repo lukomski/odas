@@ -18,10 +18,6 @@ base info about current user based on cookies
 
 authorize, create session 
 
-`PUT` ?password=
-
-change password for current user
-
 #### /api/users
 `GET`                   
 
@@ -30,6 +26,11 @@ get list of users
 `POST`?username=,password=
 
 add new user
+
+#### /api/users/<user_id>/password
+`PUT` ?password=
+
+change password for current user
 
 #### /api/notes
 `GET`?userId=
