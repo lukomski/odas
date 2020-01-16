@@ -46,21 +46,10 @@ add new note for current user
 
 info about the note
 
+`POST`?title=,message=,viewers=[],public
+
+update note for current user
+
 `DELETE`
 
 delete note
-
-#### /api/notes/<note_id>/title
-`POST`?title=
-
-update title of the note
-
-#### /api/notes/<note_id>/message
-`POST`?message=
-
-update message of the note
-
-#### /api/notes/<note_id>/viewers
-`POST`?userIds=[],public=
-
-update viewers of the note  
