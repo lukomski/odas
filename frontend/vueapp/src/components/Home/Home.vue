@@ -208,6 +208,7 @@ export default {
 	mounted: function () {
 		console.log("mouted in Home")
 		if (this.isLogged) {
+			this.loadNotes()
 			// this.loadPubData()
 			// this.loadPrivData()
 		} else {
