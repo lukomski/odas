@@ -267,6 +267,11 @@ def apiNotes():
 			session_hash = request.cookies.get("session_id")
 
 			user_hash = getUserHashBySessionHash(session_hash)
+		sender_username = getUsernameByUserHash(user_hash)
+		if sender_username == "":
+			print ("public request")
+		else:
+			print("requested by " + getUsernameByUserHash(user_hash))
 
 		owner_hash = None
 		username = ''
@@ -276,12 +281,14 @@ def apiNotes():
 			owner_hash = getUserHashByUsername(username)
 			if owner_hash == None:
 				# want filter by username which not exists
+				print("apiNotes: " + username + " not exists in DB")
 				return jsonify(
 					success=True,
 					message="lista notatek",
 					notes=[],
 					)
 
+		print("apiNotes: " + "owner_username = " + username )
 		return jsonify(
 			success=True,
 			message="lista notatek",
@@ -698,15 +705,18 @@ def getJsonAboutNotes(owner_hash, user_hash):
 
 		c_owner_hash = db.hget(key, owner_field)
 		if c_owner_hash == None:
+			print("getJsonAboutNotes: key without owner")
 			continue
 		c_owner_hash = c_owner_hash.decode()
 
 		if owner_hash != None and owner_hash != c_owner_hash:
 			# filter by owner if is not None
+			print("getJsonAboutNotes: omit due to fileter by owner")
 			continue
 
 		note_hash = db.hget(key, note_hash_field)
 		if note_hash == None:
+			print("getJsonAboutNotes: key without note_hash")
 			continue
 		note_hash = note_hash.decode()
 
@@ -714,25 +724,30 @@ def getJsonAboutNotes(owner_hash, user_hash):
 
 		if not has_access:
 			# check if is vaccesible for user_hash
+			print("getJsonAboutNotes: has no access")
 			continue
 
 		title = db.hget(key, title_field)
 		if title == None:
+			print("getJsonAboutNotes: key without title")
 			continue
 		title = title.decode()
 
 		message = db.hget(key, message_field)
 		if message == None:
+			print("getJsonAboutNotes: key without message")
 			continue
 		message = message.decode()
 
 		public = db.hget(key, public_field)
 		if public == None:
+			print("getJsonAboutNotes: key without public")
 			continue
 		public = public.decode()
 
 		viewers = db.hget(key, viewers_field)
 		if viewers == None:
+			print("getJsonAboutNotes: key without viewers")
 			continue
 		viewers = viewers.decode()
 
@@ -777,9 +792,11 @@ def getUserHashBySessionHash(session_hash):
 	return db.hget(session_id, user_id_field).decode()
 
 def getUsernameByUserHash(user_hash):
+	if user_hash == None:
+		return ""
 	user_id = "user:" + user_hash
 	if user_id not in getAllUserKeys():
-		return None
+		return ""
 
 	username_field = "username"
 	if db.hget(user_id, username_field) == None:
@@ -799,12 +816,16 @@ def getPasswordHashByUserHash(user_hash):
 		return None
 	return db.hget(user_id, password_hash_field).decode()
 
-def checkUserAccessToNote(user_hash, note_hash): # TODO check if is in viewers
+def checkUserAccessToNote(user_hash, note_hash: str): # TODO check if is in viewers
 
-	user_id = 'user:' + str(user_hash)
-	note_id = 'note:' + str(note_hash)
+	user_id = None
+	if user_hash != None:
+		user_id = 'user:' + str(user_hash)
 
-	if user_id not in getAllUserKeys():
+	note_id = 'note:' + note_hash
+	print("checkUserAccessToNote: user_id = " + str(user_id) + ", note_id = " + note_id)
+
+	if user_id != None and user_id not in getAllUserKeys():
 		return False, "user_id not in getAllUserKeys()"
 	if note_id not in getAllNoteKeys():
 		return False, "note_id not in getAllNoteKeys()"
@@ -812,8 +833,9 @@ def checkUserAccessToNote(user_hash, note_hash): # TODO check if is in viewers
 	public = db.hget(note_id, 'public')
 	if public == None:
 		return False, "public == None"
-	public = public.decode()
+	public = (public.decode() == str(True))
 	if public:
+		print("checkUserAccessToNote: is public " + note_hash + str(type(public))) 
 		return True, "OK"
 
 	owner_hash = db.hget(note_id, 'owner')
@@ -822,7 +844,7 @@ def checkUserAccessToNote(user_hash, note_hash): # TODO check if is in viewers
 	owner_hash = owner_hash.decode()
 
 	if owner_hash != user_hash:
-		return False, owner_hash + " != " + user_hash
+		return False, str(owner_hash) + " != " + str(user_hash)
 	return True, "OK"
 
 
