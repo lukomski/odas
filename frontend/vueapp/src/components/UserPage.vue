@@ -135,11 +135,33 @@ export default {
 							"message" : notes[i].message,
 							"viewers" : notes[i].viewers,
 							"public" : notes[i].public,
-							"id" : notes[i].id
+							"id" : notes[i].id,
+							"last_edit" : notes[i].last_edit
 						}
 						new_notes.push(v)
 					}
+					new_notes.sort( function (a, b) { // desc
+						if (a.last_edit == b.last_edit) {
+							return 0
+						}
+						if (a.last_edit < b.last_edit) {
+							return 1
+						}
+						return -1
+					})
 					this.notes = new_notes
+
+					let tmp_list = [3,4,2,-1]
+					tmp_list = tmp_list.sort( function (a, b) {
+						if (a == b) {
+							return 0
+						}
+						if (a < b) {
+							return 1
+						}
+						return -1
+					})
+					console.log("list = " + tmp_list)
 				} else {
 				}
 			})
@@ -175,7 +197,8 @@ export default {
 						"message" : response.data.note.message,
 						"viewers" : response.data.note.viewers,
 						"public" : response.data.note.public,
-						"id" : response.data.note.id
+						"id" : response.data.note.id,
+						"last_edit" : response.data.note.last_edit
 					}
 
 					let new_notes = []
@@ -186,6 +209,15 @@ export default {
 							new_notes.push(this.notes[i])
 						}
 					}
+					new_notes.sort( function (a, b) { // desc
+						if (a.last_edit == b.last_edit) {
+							return 0
+						}
+						if (a.last_edit < b.last_edit) {
+							return 1
+						}
+						return -1
+					})
 					this.notes = new_notes
 				} else {
 				}

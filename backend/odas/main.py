@@ -11,6 +11,7 @@ import redis
 db = redis.StrictRedis(host='redis', port=6379)
 
 import uuid
+from datetime import datetime # to add timestamp to notes
 
 import ast # need to str -> array
 
@@ -305,8 +306,6 @@ def apiNotes():
 		session_hash = request.cookies.get("session_id")
 
 		user_hash = getUserHashBySessionHash(session_hash)
-
-
 			
 		field = 'title'
 		if field not in request.json:
@@ -355,6 +354,12 @@ def apiNotes():
 		# all input read
 		# save it to DB
 		note_hash = str(uuid.uuid4()) # generate uuid
+
+		# create timestamp od now
+		now = datetime.now()
+		timestamp = int(datetime.timestamp(now))
+		print("timestamp = " + str(timestamp))
+
 		note_id = 'note:' + note_hash
 
 		db.hmset(note_id, {
@@ -363,7 +368,8 @@ def apiNotes():
 			"message" : message,
 			"public" : str(public),
 			"viewers" : str(viewers),
-			"owner" : user_hash
+			"owner" : user_hash,
+			"last_edit" : timestamp
 			})
 
 		return jsonify(
@@ -469,6 +475,11 @@ def appNote(note_hash):
 
 		
 		# all input read
+
+		# create timestamp od now
+		now = datetime.now()
+		timestamp = int(datetime.timestamp(now))
+
 		# save it to DB
 		note_id = 'note:' + note_hash
 
@@ -478,7 +489,8 @@ def appNote(note_hash):
 			"message" : message,
 			"public" : str(public),
 			"viewers" : str(viewers),
-			"owner" : user_hash
+			"owner" : user_hash,
+			"last_edit" : timestamp
 			})
 
 		return jsonify(
@@ -653,6 +665,7 @@ def getJsonAboutNote(note_hash):
 	viewers_field = "viewers"
 	note_hash_field = "note_hash"
 	owner_field = "owner"
+	last_edit_field = "last_edit"
 	title = db.hget(key, title_field)
 	if title == None:
 		return None
@@ -683,13 +696,19 @@ def getJsonAboutNote(note_hash):
 		return None
 	owner_hash = owner_hash.decode()
 
+	last_edit = db.hget(key, last_edit_field)
+	if last_edit == None:
+		return None
+	last_edit = last_edit.decode()
+
 	note_json = {
 		"title" : title,
 		"message" : message,
 		"public" : public == str(True),
 		"viewers" : ast.literal_eval(viewers),
 		"id" : note_hash,
-		"owner_id" : owner_hash
+		"owner_id" : owner_hash,
+		"last_edit" : last_edit
 	}
 	return note_json
 
@@ -701,6 +720,7 @@ def getJsonAboutNotes(owner_hash, user_hash):
 	viewers_field = "viewers"
 	note_hash_field = "note_hash"
 	owner_field = "owner"
+	last_edit_field = "last_edit"
 	for key in getAllNoteKeys():
 
 		c_owner_hash = db.hget(key, owner_field)
@@ -751,6 +771,10 @@ def getJsonAboutNotes(owner_hash, user_hash):
 			continue
 		viewers = viewers.decode()
 
+		last_edit = db.hget(key, last_edit_field)
+		if last_edit == None:
+			continue
+		last_edit = last_edit.decode()
 		
 
 		viewer_json = {
@@ -759,7 +783,8 @@ def getJsonAboutNotes(owner_hash, user_hash):
 			"public" : public == str(True),
 			"viewers" : ast.literal_eval(viewers),
 			"id" : note_hash,
-			"owner_id" : owner_hash
+			"owner_id" : owner_hash,
+			"last_edit" : last_edit
 		}
 		notes.append(viewer_json)
 	return notes
