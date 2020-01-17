@@ -107,7 +107,7 @@ export default {
 			return this.$store.state.username
 		},
 		isOwner () {
-			return this.$route.params.page_owner == this.username
+			return this.isLogged && this.$route.params.page_owner == this.username
 		},
 		addNoteVisible () {
 			return this.isLogged && this.$route.params.page_owner == this.username

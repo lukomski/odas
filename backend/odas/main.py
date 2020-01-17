@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
 import os # for environment
 
-
 app = Flask(__name__)
 CORS(app)
 
@@ -264,12 +263,18 @@ def apiNotes():
 	if request.method == 'GET':
 		# notes filterd by userId if set
 		user_hash = None
+		if 'session_id' in request.cookies:
+			session_hash = request.cookies.get("session_id")
+
+			user_hash = getUserHashBySessionHash(session_hash)
+
+		owner_hash = None
 		username = ''
 		if 'username' in request.values:
 			# dont want all accesible notes but only owned by the username
 			username = request.values.get('username')
-			user_hash = getUserHashByUsername(username)
-			if user_hash == None:
+			owner_hash = getUserHashByUsername(username)
+			if owner_hash == None:
 				# want filter by username which not exists
 				return jsonify(
 					success=True,
@@ -280,7 +285,7 @@ def apiNotes():
 		return jsonify(
 			success=True,
 			message="lista notatek",
-			notes=getJsonAboutNotes(user_hash),
+			notes=getJsonAboutNotes(owner_hash, user_hash),
 			username=user_hash
 			)
 	elif request.method == 'POST':
@@ -532,6 +537,7 @@ def api_hardReset():
 
 @app.route("/api/test")
 def api_test():
+	print("testowy endpoint")
 	return jsonify(
 		success=True,
 		message="test",
@@ -680,7 +686,7 @@ def getJsonAboutNote(note_hash):
 	}
 	return note_json
 
-def getJsonAboutNotes(user_hash):
+def getJsonAboutNotes(owner_hash, user_hash):
 	notes = []
 	title_field = "title"
 	message_field = "message"
@@ -690,12 +696,24 @@ def getJsonAboutNotes(user_hash):
 	owner_field = "owner"
 	for key in getAllNoteKeys():
 
-		owner_hash = db.hget(key, owner_field)
-		if owner_hash == None:
+		c_owner_hash = db.hget(key, owner_field)
+		if c_owner_hash == None:
 			continue
-		owner_hash = owner_hash.decode()
+		c_owner_hash = c_owner_hash.decode()
 
-		if user_hash != None and owner_hash != user_hash:
+		if owner_hash != None and owner_hash != c_owner_hash:
+			# filter by owner if is not None
+			continue
+
+		note_hash = db.hget(key, note_hash_field)
+		if note_hash == None:
+			continue
+		note_hash = note_hash.decode()
+
+		has_access, dbg = checkUserAccessToNote(user_hash, note_hash)
+
+		if not has_access:
+			# check if is vaccesible for user_hash
 			continue
 
 		title = db.hget(key, title_field)
@@ -718,10 +736,7 @@ def getJsonAboutNotes(user_hash):
 			continue
 		viewers = viewers.decode()
 
-		note_hash = db.hget(key, note_hash_field)
-		if note_hash == None:
-			continue
-		note_hash = note_hash.decode()
+		
 
 		viewer_json = {
 			"title" : title,
@@ -785,17 +800,27 @@ def getPasswordHashByUserHash(user_hash):
 	return db.hget(user_id, password_hash_field).decode()
 
 def checkUserAccessToNote(user_hash, note_hash): # TODO check if is in viewers
-	user_id = 'user:' + user_hash
-	note_id = 'note:' + note_hash
+
+	user_id = 'user:' + str(user_hash)
+	note_id = 'note:' + str(note_hash)
+
 	if user_id not in getAllUserKeys():
 		return False, "user_id not in getAllUserKeys()"
 	if note_id not in getAllNoteKeys():
 		return False, "note_id not in getAllNoteKeys()"
 
+	public = db.hget(note_id, 'public')
+	if public == None:
+		return False, "public == None"
+	public = public.decode()
+	if public:
+		return True, "OK"
+
 	owner_hash = db.hget(note_id, 'owner')
 	if owner_hash == None:
 		return False, "owner_hash == None"
 	owner_hash = owner_hash.decode()
+
 	if owner_hash != user_hash:
 		return False, owner_hash + " != " + user_hash
 	return True, "OK"

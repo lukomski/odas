@@ -11,6 +11,8 @@ services:
       - "5000:1000" # external:internal
     volumes:
       - ./backend:/odas
+    environment:
+      - PYTHONUNBUFFERED=1
   redis:
     image: "redis:alpine"
     container_name: db_t
