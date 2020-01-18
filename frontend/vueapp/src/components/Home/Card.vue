@@ -23,11 +23,15 @@
 			<BadgeElement 
 				variant="info"
 				v-for="viewer in viewers"
-				:key="viewer.id"
-				:viewer="viewer.name"
+				:key="viewer.username"
+				:viewer="viewer.username"
 				:edit="edit_viewers_visible"
-				@delete="deleteViewer(viewer.id)"
+				@delete="deleteViewer(viewer.username)"
 			/>
+
+			<b-badge variant="info" v-if="public_note_badge_visible">
+			publiczna
+			</b-badge>
 			
 			<a type="button" @click="startEditViewers()" class="h4 mb-0" v-if="viewers_pencil_visible">
 				<b-icon-pencil variant="info"/>
@@ -98,7 +102,12 @@
 				this.edit_title=false;
 
 				// send request
-				this.sendUpdateToServer(this.edit_title_input, this.message)
+				let propert_format_viewers = []
+				for (var i=0; i<this.viewers.length; i++){
+					propert_format_viewers.push(this.viewers[i].username)
+				}
+
+				this.sendUpdateToServer(this.edit_title_input, this.message, propert_format_viewers)
 				console.log("send request to update title of note")
 			},
 			rejectEditTitle: function () {
@@ -113,7 +122,11 @@
 			acceptEditMessage: function () {
 			//	this.message = this.edit_message_input
 				this.edit_message=false;
-				this.sendUpdateToServer(this.title, this.edit_message_input)
+				let propert_format_viewers = []
+				for (var i=0; i<this.viewers.length; i++){
+					propert_format_viewers.push(this.viewers[i].username)
+				}
+				this.sendUpdateToServer(this.title, this.edit_message_input, propert_format_viewers)
 				console.log("send request to update message of note")
 			},
 			rejectEditMessage: function () {
@@ -122,14 +135,49 @@
 
 			startEditViewers: function () {
 				this.rejectAllEditions()
+				this.edit_public_input = this.note_public
 				this.edit_viewers=true
 			},
 			addNewViewer: function () {
 				let newViewer = this.edit_viewer_input
-				this.viewers.push({
-					'name': newViewer,
-					'id': this.viewers.length
+				let oldViewers = this.viewers
+
+				// send req asking about users. If exists then sedn update request with new viewer
+				axios.get('http://localhost:5000/api/users')
+				.then(response => {
+					console.log(response.data)
+					let message = response.data.message
+					if (response.data.success) {
+						let users = response.data.users
+						let exists = false
+						console.log(users)
+						for (var i=0; i < users.length; i++) {
+							if (users[i].username == newViewer) {
+								exists = true
+								break;
+							}
+						}
+						if (exists) {
+							// success update
+							console.log("old list of viewers = " + oldViewers.length)
+							let new_viewers = []
+							for (var i=0; i<oldViewers.length; i++) {
+								new_viewers.push(oldViewers[i].username)
+							}
+							new_viewers.push(newViewer)
+							this.sendUpdateToServer(this.title, this.message, new_viewers)
+						} else {
+							console.log("user " + newViewer+ " not exists in:")
+							console.log(users)
+						}
+					} else {
+						alert("ER: " + message)
+					}
 				})
+				.catch(e => {
+					alert(e)  
+				})	
+
 				this.edit_viewer_input = ''
 				// check if user with such id exists
 				// add user assign user to the note
@@ -137,16 +185,19 @@
 			},
 			deleteViewer: function (viewer_id) {
 				console.log("deleteViewer" + viewer_id)
-				// remove from viewers element with viewer_id
-				for (var i = 0; i < this.viewers.length; i++) {
-					var viewer = this.viewers[i];
+				let oldViewers = this.viewers
 
-					if (viewer.id == viewer_id) {
-						this.viewers.splice(i, 1);
+				// remove from viewers element with viewer_id
+				let new_viewers = []
+				for (var i = 0; i < oldViewers.length; i++) {
+					var viewer = oldViewers[i].username;
+					if (viewer != viewer_id) {
+						new_viewers.push(viewer)
 					}
 				}
 				// send remove request to server
 				console.log("send request to update viewers in note")
+				this.sendUpdateToServer(this.title, this.message, new_viewers)
 			},
 			acceptEditViewers: function () {
 				this.edit_viewers=false
@@ -198,9 +249,9 @@
 					alert(e)  
 				})
 			},
-			sendUpdateToServer: function (new_title, new_message) {
+			sendUpdateToServer: function (new_title, new_message, new_viewers) {
 				let payload = {
-					viewers: ['ala', 'ma', 'kota'],
+					viewers: new_viewers,
 					title: new_title,
 					message: new_message,
 					public: this.edit_public_input
@@ -245,13 +296,17 @@
 			},
 			remove_button_visible: function () {
 				return (!this.insertMode) && (this.ownerMode)
+			},
+			public_note_badge_visible: function () {
+				return this.note_public && (!this.edit_viewers_visible)
 			}
 		},
 		watch: {
 			edit_public_input: function () {
-				if (this.edit_public_input) {
+				if (this.edit_public_input != this.note_public) {
 					// send req to make note public
-					console.log("send req to make note public")
+					this.sendUpdateToServer(this.title, this.message, this.viewers)
+					//console.log("send req to make note public")
 					// rm all 
 					this.viewers.splice(0, this.viewers.length)
 				}

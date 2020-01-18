@@ -150,18 +150,6 @@ export default {
 						return -1
 					})
 					this.notes = new_notes
-
-					let tmp_list = [3,4,2,-1]
-					tmp_list = tmp_list.sort( function (a, b) {
-						if (a == b) {
-							return 0
-						}
-						if (a < b) {
-							return 1
-						}
-						return -1
-					})
-					console.log("list = " + tmp_list)
 				} else {
 				}
 			})
@@ -243,6 +231,10 @@ export default {
 			} else {
 				//this.$router.push('/login').catch()
 			}
+		},
+		'$route.params.page_owner': function (val) {
+			console.log("changed to user " + this.$route.params.page_owner)
+			this.loadNotes()
 		}
 	},
 	mounted: function () {

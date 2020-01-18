@@ -10,7 +10,7 @@
         
         <b-nav-form>
           <b-form-input size="sm" class="mr-sm-2" v-model="username_input" placeholder="Użytkownik"></b-form-input>
-          <b-button size="sm" class="my-2 my-sm-0" @click="searchUser()">Szukaj</b-button>
+          <b-button size="sm" v-b-toggle.nav-collapse class="my-2 my-sm-0" @click="searchUser()">Szukaj</b-button>
         </b-nav-form>
  
       </b-navbar-nav>

@@ -14,6 +14,7 @@ import uuid
 from datetime import datetime # to add timestamp to notes
 
 import ast # need to str -> array
+import json # need to parser str -> json
 
 from argon2 import PasswordHasher
 ph = PasswordHasher()
@@ -460,18 +461,28 @@ def appNote(note_hash):
 				success=False,
 				message=field +" jest wymagany"
 				)
-		viewers = request.json.get(field)
+		viewers = request.json.get(str(field))
+		print("found viewers = " + str(viewers))
+		print("is public: " + str(public))
 
 		if public:
+			print("public is set - clear all viewers")
 			viewers = []
 
 		# filter viewers to only existings
 		all_user_hashes = getAllUserHashes()
 		filtered_viewers = []
 		for viewer in viewers:
-			if viewer in all_user_hashes:
-				filtered_viewers.append(viewer)
+			print("check viewer = " + str(viewer))
+			viewer_user_hash = getUserHashByUsername(viewer)
+			if viewer_user_hash != None and viewer_user_hash in all_user_hashes:
+				viewer_json = {
+					"username": viewer
+				}
+				filtered_viewers.append(viewer_json)
 		viewers = filtered_viewers
+
+		print("viewers after filter = " + str(viewers))
 
 		
 		# all input read
@@ -489,13 +500,13 @@ def appNote(note_hash):
 			"message" : message,
 			"public" : str(public),
 			"viewers" : str(viewers),
-			"owner" : user_hash,
+			"owner" : str(user_hash),
 			"last_edit" : timestamp
 			})
 
 		return jsonify(
 			success=True,
-			message="poprawne zaktualizowanie notatki " + title,
+			message="poprawne zaktualizowanie notatki " + str(title),
 			note_id=note_hash
 			)
 	elif request.method == 'DELETE':
@@ -863,6 +874,28 @@ def checkUserAccessToNote(user_hash, note_hash: str): # TODO check if is in view
 		print("checkUserAccessToNote: is public " + note_hash + str(type(public))) 
 		return True, "OK"
 
+
+	# check if is viewer
+	user_username = getUsernameByUserHash(user_hash)
+	if user_username == None:
+		print("checkUserAccessToNote: username = None")
+		return False, "user_username == None"
+
+	viewers_json = db.hget(note_id, 'viewers')
+	if viewers_json == None:
+		print("has no viewers json in DB")
+		return False, "owner_hash == None"
+	viewers_json_raw = viewers_json.decode()
+	print("viewers_json_raw = " + str(viewers_json_raw))
+	viewers_json_list = ast.literal_eval(viewers_json_raw)
+	print("viewers_json_list = " + str(viewers_json_list))
+	for viewer in viewers_json_list:
+		v_username = viewer['username']
+		if v_username == user_username:
+			print("found as viewer " + user_username)
+			return True, "is viewer"
+
+	# check owner
 	owner_hash = db.hget(note_id, 'owner')
 	if owner_hash == None:
 		return False, "owner_hash == None"
