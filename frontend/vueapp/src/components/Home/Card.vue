@@ -22,7 +22,7 @@
 			{{ subtitle }}
 			<BadgeElement 
 				variant="info"
-				v-for="viewer in viewers"
+				v-for="viewer in viewers_to_display"
 				:key="viewer.username"
 				:viewer="viewer.username"
 				:edit="edit_viewers_visible"
@@ -87,7 +87,8 @@
 				edit_message_input: "",
 				edit_viewers: false,
 				edit_viewer_input:'',
-				edit_public_input: false
+				edit_public_input: false,
+				viewers_in_insert_mode: []
 			}
 		},
 		props: ["title", "subtitle", "message", "viewers", "insertMode", "ownerMode", "note_hash", "note_public"],
@@ -159,13 +160,20 @@
 						}
 						if (exists) {
 							// success update
-							console.log("old list of viewers = " + oldViewers.length)
-							let new_viewers = []
-							for (var i=0; i<oldViewers.length; i++) {
-								new_viewers.push(oldViewers[i].username)
+							if (this.insertMode) {
+								let v = {
+									"username" : newViewer
+								}
+								this.viewers_in_insert_mode.push(v)
+							} else {
+								console.log("old list of viewers = " + oldViewers.length)
+								let new_viewers = []
+								for (var i=0; i<oldViewers.length; i++) {
+									new_viewers.push(oldViewers[i].username)
+								}
+								new_viewers.push(newViewer)
+								this.sendUpdateToServer(this.title, this.message, new_viewers)
 							}
-							new_viewers.push(newViewer)
-							this.sendUpdateToServer(this.title, this.message, new_viewers)
 						} else {
 							console.log("user " + newViewer+ " not exists in:")
 							console.log(users)
@@ -185,19 +193,23 @@
 			},
 			deleteViewer: function (viewer_id) {
 				console.log("deleteViewer" + viewer_id)
-				let oldViewers = this.viewers
+				if (this.insertMode) {
+					this.viewers_in_insert_mode.splice(viewer_id,1)
+				} else {
+					let oldViewers = this.viewers
 
-				// remove from viewers element with viewer_id
-				let new_viewers = []
-				for (var i = 0; i < oldViewers.length; i++) {
-					var viewer = oldViewers[i].username;
-					if (viewer != viewer_id) {
-						new_viewers.push(viewer)
+					// remove from viewers element with viewer_id
+					let new_viewers = []
+					for (var i = 0; i < oldViewers.length; i++) {
+						var viewer = oldViewers[i].username;
+						if (viewer != viewer_id) {
+							new_viewers.push(viewer)
+						}
 					}
+					// send remove request to server
+					console.log("send request to update viewers in note")
+					this.sendUpdateToServer(this.title, this.message, new_viewers)
 				}
-				// send remove request to server
-				console.log("send request to update viewers in note")
-				this.sendUpdateToServer(this.title, this.message, new_viewers)
 			},
 			acceptEditViewers: function () {
 				this.edit_viewers=false
@@ -225,8 +237,12 @@
 				})	
 			},
 			addNote: function() {
+				let propert_format_viewers = []
+				for (var i=0; i<this.viewers_in_insert_mode.length; i++){
+					propert_format_viewers.push(this.viewers_in_insert_mode[i].username)
+				}
 				let payload = {
-					viewers: ['ala', 'ma', 'kota'],
+					viewers: propert_format_viewers,
 					title: this.edit_title_input,
 					message: this.edit_message_input,
 					public: this.edit_public_input
@@ -299,10 +315,17 @@
 			},
 			public_note_badge_visible: function () {
 				return this.note_public && (!this.edit_viewers_visible)
+			},
+			viewers_to_display: function () {
+				return this.insertMode? this.viewers_in_insert_mode : this.viewers
 			}
 		},
 		watch: {
-			edit_public_input: function () {
+			edit_public_input: function () {	
+				if (this.insertMode) {
+					// omit if insertMode
+					return
+				}
 				if (this.edit_public_input != this.note_public) {
 					// send req to make note public
 					this.sendUpdateToServer(this.title, this.message, this.viewers)

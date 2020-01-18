@@ -63,6 +63,10 @@
     methods: {
       onSubmit(evt) {
         evt.preventDefault()
+        if (this.form.password != this.form.repeatPassword) {
+          alert("hasła nie są takie same")
+          return
+        }
 
         axios.post('http://localhost:5000/api/users', null, {
           params: {
@@ -73,7 +77,9 @@
         .then(response => {
           console.log(response.data)
           let message = response.data.message
-          if (response.data.status) {
+          alert(message)
+          if (response.data.success) {
+
           } else {
           }
         })

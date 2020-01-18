@@ -167,7 +167,7 @@ def apiUsers():
 			})
 
 		return jsonify(
-			success=False,
+			success=True,
 			message="poprawne dodanie uzytkownika " + username
 			)
 	else:
@@ -348,9 +348,16 @@ def apiNotes():
 		all_user_hashes = getAllUserHashes()
 		filtered_viewers = []
 		for viewer in viewers:
-			if viewer in all_user_hashes:
-				filtered_viewers.append(viewer)
+			print("check viewer = " + str(viewer))
+			viewer_user_hash = getUserHashByUsername(viewer)
+			if viewer_user_hash != None and viewer_user_hash in all_user_hashes:
+				viewer_json = {
+					"username": viewer
+				}
+				filtered_viewers.append(viewer_json)
 		viewers = filtered_viewers
+
+		print("viewers after filter = " + str(viewers))
 
 		# all input read
 		# save it to DB
@@ -369,7 +376,7 @@ def apiNotes():
 			"message" : message,
 			"public" : str(public),
 			"viewers" : str(viewers),
-			"owner" : user_hash,
+			"owner" : str(user_hash),
 			"last_edit" : timestamp
 			})
 
