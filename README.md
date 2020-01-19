@@ -1,6 +1,6 @@
 # odas
 
-_Flask + Vue.js_
+_Flask + Vue.js + Redis_
 
 ![Flask Logo](/docs/flask-logo.png "Flask Logo") ![Vue Logo](/docs/vue-logo.png "Vue Logo") ![Redis Logo](/docs/redis-logo.png "Redis Logo")
 
