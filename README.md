@@ -4,52 +4,10 @@
 ```
 docker-compose up --build
 ```
-open [http://localhost:8081](http://localhost:8081)
+open [https://localhost:8082](http://localhost:8081)
 
-## Planned enpoints
+### API
 
-#### /api/user
+API is served at https://localhost:5000.
 
-`GET`  
-
-base info about current user based on cookies
-
-`POST` ?username=,password= 
-
-authorize, create session 
-
-#### /api/users
-`GET`                   
-
-get list of users
-
-`POST`?username=,password=
-
-add new user
-
-#### /api/users/<user_id>/password
-`PUT` ?password=
-
-change password for current user
-
-#### /api/notes
-`GET`?userId=
-
-notes filterd by userId if set
-
-`POST`?title=,message=,viewers=[],public
-
-add new note for current user
-
-#### /api/notes/<note_id>
-`GET`
-
-info about the note
-
-`POST`?title=,message=,viewers=[],public
-
-update note for current user
-
-`DELETE`
-
-delete note
+Endpoints are described in README.md in backend folder
