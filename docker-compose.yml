@@ -5,14 +5,14 @@ services:
     restart: always
     build:
       context: .
-      dockerfile: ./backend/Dockerfile
+      dockerfile: ./docker/backend/Dockerfile
     command: []
     ports:
       - "5000:1000" # external:internal
     volumes:
-      - ./backend:/odas
+      - ./backend/odas:/odas/odas # external:internal
     environment:
-      - PYTHONUNBUFFERED=1
+      - PYTHONUNBUFFERED=1 # need for displying flask debug
   redis:
     image: "redis:alpine"
     container_name: db_t
@@ -24,14 +24,15 @@ services:
     build:
       context: .
       dockerfile: ./docker/frontend/Dockerfile
-      target: # uncomment selected stage: auto-reloading dev OR hosted by nginx for release    
-              dev-stage
-              #production-stage 
+      target: # uncomment one stage:  
+              #dev-stage          # auto-reloading for development
+              production-stage    # hosted by nginx for release  
     command: []
     ports:
       - "8081:80" # external:internal
+      - "8082:443" # external:internal
     volumes:
       - "./frontend/vueapp/src:/app/src"
     environment:
       - ENV=development
-      - PORT=80 #need to be 80, becouse of nginx
+      - PORT=80 #need to be 80, becouse of nginx configuration is set to 80

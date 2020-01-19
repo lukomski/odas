@@ -64,6 +64,7 @@ axios.defaults.withCredentials = true
 
 import FileDelegate from "@/components/Home/FileDelegate"
 import Card from "@/components/Home/Card"
+import config from '@/store/config'
 
 export default {
 	data: function() {
@@ -109,7 +110,7 @@ export default {
 	methods: {
 		loadNotes: function () {
 			console.log("loadNotes")
-			axios.get('http://localhost:5000/api/notes', null, {
+			axios.get(config.api + '/api/notes', null, {
 				params: {
 				}
 			})
@@ -209,8 +210,6 @@ export default {
 		console.log("mouted in Home")
 		if (this.isLogged) {
 			this.loadNotes()
-			// this.loadPubData()
-			// this.loadPrivData()
 		} else {
 			//this.$router.push('/login').catch()
 		}

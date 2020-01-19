@@ -21,21 +21,6 @@
 			remove: function () {
 				this.$emit('delete',this.file)
 			},
-			// downloadPubFile: function (filename) {
-			// 	axios.get('http://localhost:5000/api/files/' + this.username + '/pub/' + filename
-			// 	).then(response => {
-			// 		let message = response.data.message
-			// 		if (response.data.success) {
-			// 			alert("OK: " + message)
-			// 		} else {
-			// 			alert("ER: " + message)
-			// 		}
-			// 	}).catch(e => {
-			// 		// page not found
-			// 		alert("Nieznany pub użytkownik " + this.username + " e = " + e)
-			// 		//alert(e.response)  
-			// 	})
-			// }
 		}
 	}
 

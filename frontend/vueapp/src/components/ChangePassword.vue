@@ -46,6 +46,7 @@
 
 <script>
   import axios from 'axios'
+  import config from '@/store/config'
   axios.defaults.withCredentials = true
 
   export default {
@@ -72,7 +73,7 @@
           return
         }
 
-        axios.put('http://localhost:5000/api/users/' + this.username + "/password", null, {
+        axios.put(config.api + '/api/users/' + this.username + "/password", null, {
           params: {
             old_password: this.form.oldPassword,
             password: this.form.password

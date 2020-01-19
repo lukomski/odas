@@ -78,6 +78,7 @@
 <script>
 	import BadgeElement from "@/components/Home/BadgeElement"
 	import axios from 'axios'
+	import config from '@/store/config'
 	export default {
 		data: function () {
 			return {
@@ -144,7 +145,7 @@
 				let oldViewers = this.viewers
 
 				// send req asking about users. If exists then sedn update request with new viewer
-				axios.get('http://localhost:5000/api/users')
+				axios.get(config.api + '/api/users')
 				.then(response => {
 					console.log(response.data)
 					let message = response.data.message
@@ -221,7 +222,7 @@
 			},
 			deleteNote: function () {
 				console.log('deleteNote')
-				axios.delete('http://localhost:5000/api/notes/' + this.note_hash)
+				axios.delete(config.api + '/api/notes/' + this.note_hash)
 				.then(response => {
 					console.log(response.data)
 					let message = response.data.message
@@ -247,7 +248,7 @@
 					message: this.edit_message_input,
 					public: this.edit_public_input
 				}
-				axios.post('http://localhost:5000/api/notes', null, {
+				axios.post(config.api + '/api/notes', null, {
 					data: payload
 				})
 				.then(response => {
@@ -272,7 +273,7 @@
 					message: new_message,
 					public: this.edit_public_input
 				}
-				axios.post('http://localhost:5000/api/notes/' + this.note_hash, null, {
+				axios.post(config.api + '/api/notes/' + this.note_hash, null, {
 					params: {
 					},
 					data: payload

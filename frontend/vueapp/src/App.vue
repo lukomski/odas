@@ -9,7 +9,8 @@
 <script>window.jQuery || document.write('<script src="{{ url_for('static', filename='jquery.js') }}">\x3C/script>')</script>
 
 <script>
-import NavigationBar from '@/components/NavigationBar'
+	import NavigationBar from '@/components/NavigationBar'
+	import config from '@/store/config'
 	import axios from 'axios';
 	export default {
 		name: 'app',
@@ -36,7 +37,7 @@ import NavigationBar from '@/components/NavigationBar'
 				console.log("App mouted")
 			},
 			askServerAboutBasics: function (session_id) {
-				axios.get('http://localhost:5000/api/user',{
+				axios.get(config.api + '/api/user',{
 					withCredentials: true
 				})
 				.then(response => {

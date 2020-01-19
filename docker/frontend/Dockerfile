@@ -19,8 +19,11 @@ RUN npm run build
 # production stage
 FROM nginx:stable-alpine as production-stage
 COPY --from=build-stage /app/dist /usr/share/nginx/html
+COPY frontend/vueapp/nginx/default.conf /etc/nginx/conf.d/
+COPY ssl/localhost.pem /etc/ssl/certs/server.pem
+COPY ssl/localhost.key /etc/ssl/private/server.key
 
 EXPOSE 80
-#RUN sleep 100000000
+EXPOSE 443
+
 CMD ["nginx", "-g", "daemon off;"]
-#CMD ["nginx"]

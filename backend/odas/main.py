@@ -7,6 +7,8 @@ CORS(app)
 
 app.config['EXPIRATION_SECONDS'] = 300
 
+import ssl
+
 import redis
 db = redis.StrictRedis(host='redis', port=6379)
 
@@ -915,4 +917,7 @@ def checkUserAccessToNote(user_hash, note_hash: str): # TODO check if is in view
 
 if __name__ == "__main__":
 	PORT = os.environ.get('PORT')
-	app.run(host="0.0.0.0", port=int(PORT), debug=True)
+	
+	ctx = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+	ctx.load_cert_chain('ssl/server.pem', 'ssl/server.key')
+	app.run(host="0.0.0.0", port=int(PORT), debug=True, ssl_context=ctx)

@@ -64,6 +64,7 @@ axios.defaults.withCredentials = true
 
 import FileDelegate from "@/components/Home/FileDelegate"
 import Card from "@/components/Home/Card"
+import config from '@/store/config'
 
 export default {
 	data: function() {
@@ -73,6 +74,7 @@ export default {
 			upload_file: "",
 			//isOwner: true,
 			pub_files: [],
+			
 			notes: [
 				{
 					'title': '"NYT": W ukraiński samolot uderzyły dwa pociski. Nowe nagranie',
@@ -116,7 +118,7 @@ export default {
 	methods: {
 		loadNotes: function () {
 			console.log("loadNotes" + this.$route.params.page_owner)
-			axios.get('http://localhost:5000/api/notes', {
+			axios.get(config.api + '/api/notes', {
 				params: {
 					username: this.$route.params.page_owner
 				}

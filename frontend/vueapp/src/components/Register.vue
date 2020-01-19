@@ -49,6 +49,7 @@
 
 <script>
   import axios from 'axios';
+  import config from '@/store/config'
   export default {
     data() {
       return {
@@ -68,7 +69,7 @@
           return
         }
 
-        axios.post('http://localhost:5000/api/users', null, {
+        axios.post(config.api + '/api/users', null, {
           params: {
             username: this.form.login,
             password: this.form.password
