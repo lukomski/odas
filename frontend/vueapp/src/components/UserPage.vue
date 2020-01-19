@@ -161,7 +161,7 @@ export default {
 		},
 		loadNote: function (note_hash) {
 			console.log("loadNotes")
-			axios.get('http://localhost:5000/api/notes/' + note_hash, null, {
+			axios.get(config.api + '/api/notes/' + note_hash, null, {
 				params: {
 				}
 			})

@@ -8,7 +8,7 @@ _Flask + Vue.js + Redis_
 ```
 docker-compose up --build
 ```
-open [https://localhost:8082](http://localhost:8081)
+open [https://localhost:8082](https://localhost:8082)
 
 ### API
 

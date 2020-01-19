@@ -17,16 +17,18 @@ from datetime import datetime # to add timestamp to notes
 
 import ast # need to str -> array
 import json # need to parser str -> json
+import time
+time_delay = 0.5
 
 from argon2 import PasswordHasher
 ph = PasswordHasher()
 
 # ENDPOINTS
 #------------------------------------------
-
 @app.route('/api/user', methods=["GET", "POST"])
 @cross_origin(supports_credentials=True)
 def apiUser():
+	time.sleep(time_delay)
 	if request.method == 'GET':
 		# base info about current user based on cookies
 		if 'session_id' not in request.cookies:
@@ -129,6 +131,7 @@ def apiUser():
 @app.route('/api/users', methods=['GET', 'POST'])
 @cross_origin(supports_credentials=True)
 def apiUsers():
+	time.sleep(time_delay)
 	if request.method == 'GET':
 		# get list of users
 		return jsonify(
@@ -180,6 +183,7 @@ def apiUsers():
 @app.route('/api/users/<username>/password', methods=['PUT'])
 @cross_origin(supports_credentials=True)
 def apiUserPassword(username):
+	time.sleep(time_delay)
 	if request.method == 'PUT':
 		# change password
 		if 'session_id' not in request.cookies:
@@ -264,6 +268,7 @@ def apiUserPassword(username):
 @app.route('/api/notes', methods=['GET', 'POST'])
 @cross_origin(supports_credentials=True)
 def apiNotes():
+	time.sleep(time_delay)
 	if request.method == 'GET':
 		# notes filterd by userId if set
 		user_hash = None
@@ -396,6 +401,7 @@ def apiNotes():
 @app.route('/api/notes/<note_hash>', methods=['GET', 'POST', 'DELETE'])
 @cross_origin(supports_credentials=True)
 def appNote(note_hash):
+	time.sleep(time_delay)
 	if request.method == 'GET':
 		if 'session_id' not in request.cookies:
 			return jsonify(
@@ -558,49 +564,49 @@ def appNote(note_hash):
 			)
 # ENDPOINTS FOR DEVELOPMENT
 #------------------------------------------
-@app.route('/api/keys')
-def keys():
-	return jsonify(
-		success=False,
-		message=str(getDBKeys())
-		)
+# @app.route('/api/keys')
+# def keys():
+# 	return jsonify(
+# 		success=False,
+# 		message=str(getDBKeys())
+# 		)
 
-@app.route("/api/hardreset")
-def api_hardReset():
-	db.flushdb()
-	return jsonify(
-		success=True,
-		message="hard reset",
-		keys=str(getDBKeys())
-		)
+# @app.route("/api/hardreset")
+# def api_hardReset():
+# 	db.flushdb()
+# 	return jsonify(
+# 		success=True,
+# 		message="hard reset",
+# 		keys=str(getDBKeys())
+# 		)
 
-@app.route("/api/test")
-def api_test():
-	print("testowy endpoint")
-	return jsonify(
-		success=True,
-		message="test",
-		users=str(getAllNoteKeys())
-		)
+# @app.route("/api/test")
+# def api_test():
+# 	print("testowy endpoint")
+# 	return jsonify(
+# 		success=True,
+# 		message="test",
+# 		users=str(getAllNoteKeys())
+# 		)
 
-@app.route("/api/sessions")
-def api_sessions():
-	return jsonify(
-		success=True,
-		message="sessions",
-		users=str(getAllSessionKeys())
-		)
+# @app.route("/api/sessions")
+# def api_sessions():
+# 	return jsonify(
+# 		success=True,
+# 		message="sessions",
+# 		users=str(getAllSessionKeys())
+# 		)
 
-@app.route("/api/redis")
-def api_printRedis():
-	l = []
-	keys=getDBKeys()
-	for key in keys:
-		l.append(str(db.hgetall(key)))
-	return jsonify(
-		success=True,
-		message=l
-		)
+# @app.route("/api/redis")
+# def api_printRedis():
+# 	l = []
+# 	keys=getDBKeys()
+# 	for key in keys:
+# 		l.append(str(db.hgetall(key)))
+# 	return jsonify(
+# 		success=True,
+# 		message=l
+# 		)
 
 
 # FUNCTIONS
