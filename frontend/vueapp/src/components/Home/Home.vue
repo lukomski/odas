@@ -74,29 +74,7 @@ export default {
 			upload_file: "",
 			isOwner: true,
 			pub_files: [],
-			notes: [
-				{
-					'title': '"NYT": W ukraiński samolot uderzyły dwa pociski. Nowe nagranie',
-					'author': 'Obserwatorzy',
-					'message': 'Tuż po katastrofie pojawiły się spekulacje, że samolot mógł zostać zestrzelony przez Iran, ponieważ w tym czasie Teheran przeprowadzał atak na amerykańskie bazy w Iraku. Początkowo Iran odpierał zarzuty, jednak w sobotę ogłosił, że do zestrzelenia faktycznie doszło. "Z powodu błędu ludzkiego, w Czytaj więcej na https://fakty.interia.pl/raporty/raport-bliski-wschod/aktualnosci/news-nyt-w-ukrainski-samolot-uderzyly-dwa-pociski-nowe-nagranie,nId,4260996#utm_source=paste&utm_medium=paste&utm_campaign=chrome"',
-					'viewers': [
-						{ 'name': 'Adam', 'id': 0},
-						{ 'name': 'Jacek', 'id': 1},
-						{ 'name': 'Michał', 'id': 2}
-						],
-					'id': "0"
-				},
-				{
-					'title': 'Interwencja w Nowym Czarnowie. Areszt dla drugiego policjanta',
-					'author': 'Obserwatorzy',
-					'message': 'Dwa miesiące w areszcie spędzi policjant, który usłyszał zarzut przekroczenia uprawnień podczas interwencji w Nowym Czarnowie - poinformowała we wtorek prokuratura. Wcześniej sąd zdecydował o tymczasowym aresztowaniu innego policjanta z patrolu, który miał niewłaściwie użyć siły wobec mieszkańca Gryfina.',
-					'viewers': [
-						{'name': 'Łysy', 'id': 0},
-						{'name': 'Biały', 'id': 1}
-						],
-					'id': "1"
-				}
-			]
+			notes: []
 		}
 	},
 	computed: {

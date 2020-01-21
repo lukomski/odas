@@ -20,8 +20,25 @@ import json # need to parser str -> json
 import time
 time_delay = 0.5
 
+import argon2
 from argon2 import PasswordHasher
-ph = PasswordHasher()
+
+ph = PasswordHasher(
+	time_cost=10,# amount of iterations
+	memory_cost=102400, #Defines the memory usage, given in kibibytes.
+	parallelism=8, #Defines the number of parallel threads (changes the resulting hash value).
+	hash_len=32, #Length of the hash in bytes.
+	salt_len=32, #Length of random salt to be generated for each password.
+	encoding='utf-8', #The Argon2 C library expects bytes. So if hash() or verify() are passed an unicode string, it will be encoded using this encoding.
+	type=argon2.low_level.Type.ID) #Argon2 type to use. Only change for interoperability with legacy systems.
+
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+limiter = Limiter(
+    app,
+    key_func=get_remote_address,
+    default_limits=["3 per second"] # limit for all endpoints
+)
 
 # ENDPOINTS
 #------------------------------------------
