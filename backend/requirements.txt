@@ -1,5 +1,5 @@
 Flask==1.1.1
-Flask-Cors==3.0.8
+Flask-Cors==3.0.9
 redis==3.3.11
 flask-redis==0.4.0
 Flask-Limiter==1.1.0
